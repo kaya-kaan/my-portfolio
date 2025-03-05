@@ -5,18 +5,17 @@ import Navbar from './/components/Navbar';
 
 export default function Home() {
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-purple-600 text-white flex flex-col items-center justify-center">
       <Head>
-        <title>Hello I'm Kaan Kaya, this is my Portfolio.</title>
+        <title>Kaan Kaya | Software Developer</title>
         <meta name="description" content="A portfolio showcasing my projects and skills." />
       </Head>
 
       <Navbar />
 
-      <main className="mt-16 flex flex-col items-center text-center p-6">
-
+      <main className="mt-20 flex flex-col items-center text-center p-6">
         <h2 className="text-5xl font-extrabold">Welcome to My Portfolio</h2>
-        <p>
+        <p className="mt-4 text-lg max-w-2xl">
           I am a web developer passionate about building modern, scalable applications. 
           Check out my projects below!
         </p>
