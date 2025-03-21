@@ -42,6 +42,7 @@ export default function Home() {
       <Head>
         <title>My Portfolio</title>
         <meta name="description" content="A portfolio showcasing my projects and skills." />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <div className={`fixed top-0 w-full transition-opacity duration-500 ease-in-out ${showNavbar ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
@@ -78,7 +79,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section ref={contactRef} className="min-h-screen p-10 bg-blue-300 text-gray-900 text-center">
+        <section ref={contactRef} className="min-h-screen p-10 text-gray-900 text-center">
           <h2 className="text-4xl font-bold">Contact Me</h2>
           <p className="mt-4 text-lg">Feel free to reach out via email or social media.</p>
           
@@ -90,7 +91,7 @@ export default function Home() {
               <a href="https://github.com/kaya-kaan" target="_blank" rel="noopener noreferrer" className="flex items-center text-lg font-semibold text-gray-900 hover:text-gray-700">
                 <FaGithub className="mr-2" size={24} /> GitHub
               </a>
-              <a href="https://www.linkedin.com/in/kaankaya/" target="_blank" rel="noopener noreferrer" className="flex items-center text-lg font-semibold text-gray-900 hover:text-gray-700">
+              <a href="https://www.linkedin.com/in/kaankaya7/" target="_blank" rel="noopener noreferrer" className="flex items-center text-lg font-semibold text-gray-900 hover:text-gray-700">
                 <FaLinkedin className="mr-2" size={24} /> LinkedIn
               </a>
             </div>
