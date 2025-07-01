@@ -13,6 +13,10 @@ export default function Home() {
   const contactRef = useRef<HTMLDivElement | null>(null);
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [status, setStatus] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,6 +40,31 @@ export default function Home() {
       ref.current.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setStatus(null);
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, message }),
+      });
+
+      if (res.ok) {
+        setStatus('Message sent!');
+        setName('');
+        setEmail('');
+        setMessage('');
+      } else {
+        setStatus('Failed to send message.');
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setStatus('Failed to send message.');
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-200 to-blue-400 text-gray-900 flex flex-col items-center justify-center">
@@ -97,12 +126,36 @@ export default function Home() {
             </div>
           </div>
           
-          <form className="mt-6 max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+<form onSubmit={handleSubmit} className="mt-6 max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-xl font-bold mb-4">Send a Message</h3>
-            <input type="text" placeholder="Your Name" className="w-full p-2 border rounded mb-4" required />
-            <input type="email" placeholder="Your Email" className="w-full p-2 border rounded mb-4" required />
-            <textarea placeholder="Your Message" className="w-full p-2 border rounded mb-4" rows="4" required></textarea>
-            <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">Send</button>
+<input
+              type="text"
+              placeholder="Your Name"
+              className="w-full p-2 border rounded mb-4"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+            <input
+              type="email"
+              placeholder="Your Email"
+              className="w-full p-2 border rounded mb-4"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <textarea
+              placeholder="Your Message"
+              className="w-full p-2 border rounded mb-4"
+              rows={4}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              required
+            ></textarea>
+            <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">
+              Send
+            </button>
+            {status && <p className="mt-2 text-center">{status}</p>}
           </form>
         </section>
       </main>

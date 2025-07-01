@@ -1,6 +1,5 @@
 "use client";
 
-import Link from 'next/link';
 import { RefObject } from 'react';
 import Image from 'next/image';
 
