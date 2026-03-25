@@ -10,29 +10,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Create a transporter if environment variables are provided
     const { EMAIL_USER, EMAIL_PASS, EMAIL_TO } = process.env;
-    if (EMAIL_USER && EMAIL_PASS && EMAIL_TO) {
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: EMAIL_USER,
-          pass: EMAIL_PASS,
+    if (!EMAIL_USER || !EMAIL_PASS || !EMAIL_TO) {
+      return NextResponse.json(
+        {
+          error:
+            'Contact form delivery is not configured yet. Please use the direct email link instead.',
         },
-      });
-
-      await transporter.sendMail({
-        from: EMAIL_USER,
-        to: EMAIL_TO,
-        subject: `Portfolio Contact from ${name}`,
-        text: message,
-        replyTo: email,
-      });
-    } else {
-      console.log('Contact form submission:', { name, email, message });
+        { status: 503 }
+      );
     }
 
-    return NextResponse.json({ success: true });
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: EMAIL_USER,
+        pass: EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: EMAIL_USER,
+      to: EMAIL_TO,
+      subject: `Portfolio Contact from ${name}`,
+      text: message,
+      replyTo: email,
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Message sent successfully. I will get back to you soon.',
+    });
   } catch (error) {
     console.error('Error processing contact request:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
