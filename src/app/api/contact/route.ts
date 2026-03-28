@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,8 +10,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const { EMAIL_USER, EMAIL_PASS, EMAIL_TO } = process.env;
-    if (!EMAIL_USER || !EMAIL_PASS || !EMAIL_TO) {
+    const { RESEND_API_KEY, EMAIL_FROM, EMAIL_TO } = process.env;
+    if (
+      !RESEND_API_KEY ||
+      RESEND_API_KEY === 'replace_with_new_resend_api_key' ||
+      !EMAIL_TO
+    ) {
       return NextResponse.json(
         {
           error:
@@ -21,21 +25,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: EMAIL_USER,
-        pass: EMAIL_PASS,
-      },
+    const resend = new Resend(RESEND_API_KEY);
+    const from = EMAIL_FROM || 'Portfolio Contact <onboarding@resend.dev>';
+
+    const { error } = await resend.emails.send({
+      from,
+      to: [EMAIL_TO],
+      subject: `Portfolio Contact from ${name}`,
+      replyTo: email,
+      text: `Name: ${name}\nEmail: ${email}\n\n${message}`,
+      html: `
+        <h2>Portfolio Contact Form</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Message:</strong></p>
+        <p>${message.replace(/\n/g, '<br />')}</p>
+      `,
     });
 
-    await transporter.sendMail({
-      from: EMAIL_USER,
-      to: EMAIL_TO,
-      subject: `Portfolio Contact from ${name}`,
-      text: message,
-      replyTo: email,
-    });
+    if (error) {
+      console.error('Resend error:', error);
+      return NextResponse.json(
+        {
+          error: error.message || 'Email delivery failed.',
+        },
+        { status: 502 }
+      );
+    }
 
     return NextResponse.json({
       success: true,

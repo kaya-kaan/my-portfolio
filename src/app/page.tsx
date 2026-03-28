@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef, useState } from "react";
 import type { RefObject } from "react";
 import Navbar from "../components/Navbar";
@@ -63,6 +64,7 @@ const focusAreas = [
 ];
 
 const resumePath = "/Kaan_Kaya_Resume.pdf";
+const resumePreviewPath = "/resume-preview.png";
 
 export default function Home() {
   const homeRef = useRef<HTMLDivElement | null>(null);
@@ -182,27 +184,20 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="rounded-[1.75rem] border border-cyan-200 bg-cyan-50/90 p-6 text-slate-900 shadow-[0_25px_60px_rgba(14,116,144,0.12)]">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-800">
+          <div className="bg-[#6f4e37] rounded-[1.75rem] border border-amber-200 bg-amber-50/90 p-6 text-slate-900 shadow-[0_25px_60px_rgba(180,83,9,0.12)]">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-900">
               Core Focus
             </p>
             <ul className="mt-6 space-y-3">
               {focusAreas.map((area) => (
                 <li
                   key={area}
-                  className="rounded-2xl border border-cyan-100 bg-white px-4 py-4 text-base text-slate-800"
+                  className="rounded-2xl border border-amber-100 bg-white px-4 py-4 text-base text-slate-800"
                 >
                   {area}
                 </li>
               ))}
             </ul>
-            <div className="mt-8 rounded-2xl border border-cyan-200 bg-white/80 p-4">
-              <p className="text-sm leading-7 text-slate-700">
-                Strong foundation in data structures, algorithms, object-oriented
-                programming, and building systems that stay maintainable as
-                requirements grow.
-              </p>
-            </div>
           </div>
         </section>
 
@@ -230,9 +225,9 @@ export default function Home() {
                 key={project.title}
                 className="grid gap-6 rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[0_16px_40px_rgba(15,23,42,0.06)] lg:grid-cols-[220px_1fr]"
               >
-                <div className="flex flex-col justify-between gap-6 rounded-[1.5rem] bg-slate-950 p-5 text-white">
+                <div className="flex flex-col justify-between gap-6 rounded-[1.5rem] bg-[#6f4e37] p-5 text-white">
                   <div>
-                    <p className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-300">
+                    <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-200">
                       Project
                     </p>
                     <h3 className="mt-3 text-2xl font-bold">{project.title}</h3>
@@ -244,7 +239,7 @@ export default function Home() {
                     {project.stack.map((item) => (
                       <span
                         key={item}
-                        className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-100"
+                        className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-stone-100"
                       >
                         {item}
                       </span>
@@ -284,15 +279,12 @@ export default function Home() {
 
           <div className="flex items-start">
             <div className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
-              <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-950 p-5 text-white sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-3 border-b border-amber-200 bg-[#6f4e37] p-5 text-white sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-cyan-300">
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-amber-200">
                     Resume Preview
                   </p>
-                  <p className="mt-2 text-sm leading-7 text-slate-300">
-                    A compact preview of the latest PDF without letting it take
-                    over the section.
-                  </p>
+
                 </div>
                 <a
                   href={resumePath}
@@ -303,12 +295,21 @@ export default function Home() {
                   Open Full Resume
                 </a>
               </div>
-              <div className="h-[24rem] bg-stone-100 p-3">
-                <iframe
-                  src={resumePath}
-                  title="Kaan Kaya resume preview"
-                  className="h-full w-full rounded-[1rem] border border-slate-200 bg-white"
-                />
+              <div className="bg-stone-100 p-3">
+                <a
+                  href={resumePath}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block overflow-hidden rounded-[1rem] border border-slate-200 bg-white transition hover:opacity-95"
+                >
+                  <Image
+                    src={resumePreviewPath}
+                    alt="Preview of Kaan Kaya's resume"
+                    width={816}
+                    height={1056}
+                    className="h-auto w-full"
+                  />
+                </a>
               </div>
             </div>
           </div>

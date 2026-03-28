@@ -51,11 +51,11 @@ export default function Navbar({
           aria-label="Go to home section"
         >
           <Image
-            src="/logo.png"
+            src="/logo.jpg"
             alt="Kaan Kaya logo"
             width={38}
             height={38}
-            className="rounded-full border border-slate-200"
+            className="h-[38px] w-[38px] rounded-full border border-slate-200 object-cover"
           />
           <div>
             <p className="text-base font-bold text-slate-950">Kaan Kaya</p>
