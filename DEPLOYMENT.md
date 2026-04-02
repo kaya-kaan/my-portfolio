@@ -14,6 +14,7 @@ This project is set up for self-hosting on a VPS with Docker Compose and Caddy.
 1. Copy `.env.production.example` to `.env.production`.
 2. Fill in:
    - `DOMAIN`
+   - `NEXT_PUBLIC_SITE_URL` for canonical URLs, sitemap, and social metadata
    - `RESEND_API_KEY`
    - `EMAIL_TO`
    - `EMAIL_FROM` once your sending domain is verified
@@ -28,7 +29,7 @@ This project is set up for self-hosting on a VPS with Docker Compose and Caddy.
 ## Start The Stack
 
 ```bash
-docker compose up -d --build
+docker compose --env-file .env.production up -d --build
 ```
 
 ## Verify
@@ -46,3 +47,4 @@ Visit your domain once DNS points at the VPS.
 - Caddy will handle HTTPS automatically once the domain points to the server.
 - The app listens on port `3000` internally and is only exposed through Caddy.
 - `output: "standalone"` is enabled in `next.config.ts` to keep the runtime image leaner.
+- `--env-file .env.production` is required so Docker Compose can pass your domain into the image build, which lets Next.js generate the correct canonical metadata, `robots.txt`, and `sitemap.xml`.
