@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            'Contact form delivery is not configured yet. Please use the direct email link instead.',
+            'Email delivery is unavailable right now. Please reach out directly by email.',
         },
         { status: 503 }
       );

@@ -1,7 +1,8 @@
 import HomePage from "../components/HomePage";
-import { getSiteUrl, siteConfig } from "../lib/site";
+import { getSiteUrl, hasContactFormConfig, siteConfig } from "../lib/site";
 
 const siteUrl = getSiteUrl();
+const contactFormEnabled = hasContactFormConfig();
 
 const structuredData = [
   {
@@ -11,7 +12,6 @@ const structuredData = [
     jobTitle: siteConfig.jobTitle,
     description: siteConfig.description,
     email: siteConfig.email,
-    telephone: siteConfig.phone,
     sameAs: [siteConfig.githubUrl, siteConfig.linkedinUrl],
     knowsAbout: siteConfig.focusAreas,
     ...(siteUrl
@@ -43,7 +43,7 @@ export default function Page() {
           __html: JSON.stringify(structuredData),
         }}
       />
-      <HomePage />
+      <HomePage contactFormEnabled={contactFormEnabled} />
     </>
   );
 }

@@ -17,14 +17,13 @@ export const siteConfig = {
   ],
   socialImage: "/logo.jpg",
   email: "kaan.kaya.dev@gmail.com",
-  phone: "+16472812725",
   githubUrl: "https://github.com/kaya-kaan",
   linkedinUrl: "https://www.linkedin.com/in/kaankaya7/",
   focusAreas: [
-    "Backend development",
-    "Data-driven systems",
+    "Backend engineering",
+    "Data-intensive applications",
     "Workflow automation",
-    "Scalable application design",
+    "Full-stack product development",
   ],
 } as const;
 
@@ -58,4 +57,14 @@ export const getSiteUrl = () => {
   }
 
   return undefined;
+};
+
+export const hasContactFormConfig = () => {
+  const { RESEND_API_KEY, EMAIL_TO } = process.env;
+
+  return Boolean(
+    RESEND_API_KEY &&
+      RESEND_API_KEY !== "replace_with_new_resend_api_key" &&
+      EMAIL_TO,
+  );
 };

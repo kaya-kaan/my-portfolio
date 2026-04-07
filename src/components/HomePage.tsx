@@ -2,14 +2,42 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { FaArrowRight, FaEnvelope, FaGithub, FaLinkedin } from "react-icons/fa";
+import type { IconType } from "react-icons";
+import {
+  FaArrowRight,
+  FaEnvelope,
+  FaGithub,
+  FaJava,
+  FaLinkedin,
+} from "react-icons/fa";
+import {
+  SiAndroid,
+  SiGithub,
+  SiMysql,
+  SiNextdotjs,
+  SiReact,
+  SiTailwindcss,
+  SiTypescript,
+} from "react-icons/si";
 import Navbar from "./Navbar";
+
+type StackItem = {
+  label: string;
+  icon: IconType;
+  accentClassName: string;
+};
 
 type Project = {
   title: string;
-  stack: string[];
+  stack: StackItem[];
   summary: string;
   details: string[];
+  repoUrl?: string;
+};
+
+type TechHighlight = StackItem & {
+  category: string;
+  description: string;
 };
 
 type StatusState = {
@@ -17,55 +45,179 @@ type StatusState = {
   message: string;
 } | null;
 
+type HomePageProps = {
+  contactFormEnabled: boolean;
+};
+
+const stackItems = {
+  java: {
+    label: "Java",
+    icon: FaJava,
+    accentClassName: "bg-orange-100 text-orange-700",
+  },
+  android: {
+    label: "Android",
+    icon: SiAndroid,
+    accentClassName: "bg-emerald-100 text-emerald-700",
+  },
+  mysql: {
+    label: "MySQL",
+    icon: SiMysql,
+    accentClassName: "bg-sky-100 text-sky-700",
+  },
+  nextjs: {
+    label: "Next.js",
+    icon: SiNextdotjs,
+    accentClassName: "bg-slate-200 text-slate-900",
+  },
+  react: {
+    label: "React",
+    icon: SiReact,
+    accentClassName: "bg-cyan-100 text-cyan-700",
+  },
+  tailwind: {
+    label: "Tailwind CSS",
+    icon: SiTailwindcss,
+    accentClassName: "bg-teal-100 text-teal-700",
+  },
+  typescript: {
+    label: "TypeScript",
+    icon: SiTypescript,
+    accentClassName: "bg-blue-100 text-blue-700",
+  },
+  github: {
+    label: "GitHub",
+    icon: SiGithub,
+    accentClassName: "bg-slate-100 text-slate-700",
+  },
+} as const satisfies Record<string, StackItem>;
+
 const projects: Project[] = [
   {
     title: "Smart Spender",
-    stack: ["Java", "Android"],
-    summary: "Budget Tracking Application",
+    stack: [stackItems.java, stackItems.android],
+    summary:
+      "Android budgeting app for tracking spending, budgets, and category-level financial insights.",
     details: [
-      "This project is a mobile-first budgeting application designed to help users actively manage their personal finances through structured tracking and real-time insights. Built as part of a collaborative Agile team, the application focuses on usability, performance, and clear financial visibility.",
-      "The system allows users to record income and expenses across multiple categories, set budgets, and monitor spending behavior dynamically. The core logic was designed to handle categorized financial data efficiently, ensuring accurate aggregation and real-time updates across the app.",
-      "A key contribution was the development of modular tracking components that support flexible financial inputs while maintaining consistency in how data is processed and displayed. The application also includes an interactive dashboard that visualizes financial activity, helping users quickly understand their spending patterns without digging through raw data.",
-      "Extensive testing was conducted across multiple Android devices to identify performance bottlenecks and UI inconsistencies. This resulted in improved responsiveness, smoother navigation, and a more reliable user experience overall.",
-      "The project demonstrates strong fundamentals in mobile development, object-oriented design, and building user-centric systems that translate complex data into usable insights.",
+      "Built an Android application in Java for recording income and expenses across multiple spending categories.",
+      "Implemented budget tracking flows and a dashboard that surfaces spending patterns without making users dig through raw entries.",
+      "Structured the app around modular tracking components so financial data stays consistent across screens and calculations.",
+      "Tested across multiple Android devices and fixed responsiveness and navigation issues uncovered during QA.",
     ],
+    repoUrl: "https://github.com/atmiya0/SmartSpender_EECS4443",
   },
   {
     title: "Portfolio Website",
-    stack: ["Next.js", "React", "Tailwind CSS"],
-    summary: "Responsive personal site",
-    details: [
-      "This is a fully responsive portfolio website built to present projects, technical skills, and experience in a clean and structured format. The focus of this project was not just design, but performance, scalability, and maintainability.",
-      "The application is built using Next.js, leveraging server-side rendering and optimized routing to improve load times and SEO performance. The UI is structured using reusable React components, allowing for consistent design patterns and easier future expansion.",
-      "A key focus was performance optimization: minimizing unnecessary re-renders, optimizing asset loading, and ensuring fast navigation across pages. The site adapts seamlessly across different screen sizes, maintaining usability and visual consistency on both mobile and desktop.",
-      "The project also emphasizes clean architecture and component reusability, making it easy to scale as new projects and features are added over time.",
-      "This is not just a portfolio. It is a demonstration of front-end engineering practices, performance awareness, and attention to user experience.",
+    stack: [
+      stackItems.nextjs,
+      stackItems.react,
+      stackItems.tailwind,
+      stackItems.typescript,
     ],
+    summary:
+      "Responsive personal site built to present projects, skills, and contact paths with clean structure and strong UX.",
+    details: [
+      "Built the site with Next.js, React, TypeScript, and Tailwind CSS using reusable sections and a fully responsive layout.",
+      "Added SEO metadata, structured data, and optimized image handling so the portfolio is easier to discover and share.",
+      "Integrated a server-backed contact workflow with Resend support and direct-contact fallbacks when delivery is unavailable.",
+      "Designed the content model so projects, links, and stack information can be updated quickly as new work ships.",
+    ],
+    repoUrl: "https://github.com/kaya-kaan/my-portfolio",
   },
   {
     title: "House Hunter Canada",
-    stack: ["Java", "MySQL"],
-    summary: "Housing Affordability Analyzer",
+    stack: [stackItems.java, stackItems.mysql],
+    summary:
+      "Housing affordability analyzer focused on querying regional housing and income data across Canada.",
     details: [
-      "This project is a data-driven application designed to analyze housing affordability across different regions in Canada using structured datasets. The goal was to turn raw housing and income data into something users can actually query and make sense of.",
-      "The backend system was built in Java, with MySQL used to manage and query large datasets efficiently. A major focus was optimizing SQL queries to handle filtering across multiple variables such as income levels, geographic regions, and housing types without performance degradation.",
-      "The application supports dynamic search functionality, allowing users to apply multiple filters simultaneously and retrieve relevant results quickly. This required careful design of query logic and indexing strategies to maintain responsiveness even as dataset size increases.",
-      "The project highlights strengths in backend development, database design, and working with real-world data constraints. It shows the ability to build systems that are not just functional, but scalable and efficient under realistic data loads.",
+      "Built a Java and MySQL application for exploring housing affordability across regions with structured search filters.",
+      "Designed query flows around income level, geography, and housing type so users can compare the data that matters to them.",
+      "Focused on SQL structure and indexing strategy to keep multi-filter searches responsive as dataset size grows.",
+      "Turned raw housing and income datasets into a more practical search experience instead of static tables or spreadsheets.",
     ],
   },
 ];
 
 const focusAreas = [
-  "Backend development",
-  "Data-driven systems",
-  "Workflow automation",
-  "Scalable application design",
+  "Backend services that stay easy to reason about",
+  "Data-heavy features with clear querying and reporting",
+  "Automation that removes repetitive manual work",
+  "Web products that stay fast across devices",
+];
+
+const techHighlights: TechHighlight[] = [
+  {
+    ...stackItems.java,
+    category: "Backend",
+    description:
+      "Primary language for object-oriented application logic, business rules, and systems work.",
+  },
+  {
+    ...stackItems.typescript,
+    category: "Web",
+    description:
+      "Type-safe development for React and Next.js interfaces that are easier to maintain over time.",
+  },
+  {
+    ...stackItems.nextjs,
+    category: "Framework",
+    description:
+      "Used for routing, SEO, server rendering, and polished production-ready frontend workflows.",
+  },
+  {
+    ...stackItems.react,
+    category: "Frontend",
+    description:
+      "Reusable component architecture for responsive, accessible interfaces and smooth iteration.",
+  },
+  {
+    ...stackItems.tailwind,
+    category: "Styling",
+    description:
+      "Fast UI implementation with utility-first styling and consistent design across sections.",
+  },
+  {
+    ...stackItems.mysql,
+    category: "Data",
+    description:
+      "Relational modeling and query design for data-driven applications and reporting-heavy flows.",
+  },
+  {
+    ...stackItems.android,
+    category: "Mobile",
+    description:
+      "Experience building native Android coursework projects with device testing and UI refinement.",
+  },
+  {
+    ...stackItems.github,
+    category: "Tooling",
+    description:
+      "Source control, portfolio publishing, and code sharing that makes projects easy to review.",
+  },
+];
+
+const aboutHighlights = [
+  {
+    label: "I enjoy solving",
+    value:
+      "messy data problems, repetitive workflows, and backend tasks that need to become simpler and more reliable.",
+  },
+  {
+    label: "I am excited about",
+    value:
+      "Java, TypeScript, SQL, automation, and the product thinking required to turn technical work into useful outcomes.",
+  },
+  {
+    label: "I am looking for",
+    value:
+      "software engineering roles where I can contribute across backend or full-stack work, ship real features, and keep sharpening my fundamentals.",
+  },
 ];
 
 const resumePath = "/Kaan_Kaya_Resume.pdf";
 const resumePreviewPath = "/resume-preview.png";
 
-export default function HomePage() {
+export default function HomePage({ contactFormEnabled }: HomePageProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -101,15 +253,14 @@ export default function HomePage() {
           tone: "error",
           message:
             data?.error ??
-            "The form is unavailable right now. Please use the direct email link.",
+            "I could not send the message right now. Please email me directly.",
         });
       }
     } catch (error) {
       console.error("Error sending message:", error);
       setStatus({
         tone: "error",
-        message:
-          "The form is unavailable right now. Please use the direct email link.",
+        message: "I could not send the message right now. Please email me directly.",
       });
     } finally {
       setIsSubmitting(false);
@@ -118,41 +269,40 @@ export default function HomePage() {
 
   return (
     <div className="relative overflow-hidden">
-      <div className="absolute inset-x-0 top-0 -z-10 h-[32rem] bg-[radial-gradient(circle_at_top,_rgba(37,99,235,0.18),_transparent_55%),radial-gradient(circle_at_20%_20%,_rgba(30,64,175,0.14),_transparent_32%)]" />
       <Navbar />
 
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pb-16 pt-20 sm:px-6 lg:px-8">
+      <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pb-16 pt-28 sm:px-6 sm:pt-32 lg:px-8">
         <section
           id="home"
-          className="scroll-mt-28 grid min-h-[36rem] items-center gap-6 rounded-[2rem] border border-stone-200/70 bg-white/85 px-6 py-8 shadow-[0_30px_80px_rgba(15,23,42,0.08)] backdrop-blur md:grid-cols-[1.3fr_0.7fr] md:px-10 md:py-8"
+          className="theme-panel scroll-mt-28 grid min-h-[36rem] items-center gap-6 rounded-[2rem] border px-6 py-8 backdrop-blur md:grid-cols-[1.3fr_0.7fr] md:px-10 md:py-8"
         >
           <div className="space-y-6">
-            <p className="inline-flex rounded-full border border-blue-300 bg-blue-100 px-4 py-1 text-sm font-semibold uppercase tracking-[0.18em] text-blue-900">
-              New Graduate Software Engineer
+            <p className="theme-pill-accent inline-flex rounded-full border px-4 py-1 text-sm font-semibold uppercase tracking-[0.18em]">
+              Software Engineer
             </p>
             <div className="space-y-4">
-              <h1 className="max-w-3xl text-4xl font-black tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
+              <h1 className="theme-text-strong max-w-3xl text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
                 Kaan Kaya
               </h1>
-              <p className="max-w-3xl text-xl leading-8 text-slate-700 sm:text-2xl">
-                I build scalable software, backend services, and data-driven
-                systems that solve real problems. From workflow automation to
-                full-stack application development, I focus on practical
-                performance, maintainable architecture, and measurable impact.
+              <p className="theme-text-secondary max-w-3xl text-xl leading-8 sm:text-2xl">
+                I build backend-heavy products, data workflows, and web
+                interfaces that stay practical under real constraints. My focus
+                is clear architecture, maintainable code, and software that
+                turns messy requirements into dependable systems.
               </p>
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
               <a
                 href="#projects"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className="theme-button-primary inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition"
               >
                 View Projects
                 <FaArrowRight size={12} />
               </a>
               <a
                 href="#contact"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-400 hover:bg-slate-50"
+                className="theme-button-secondary inline-flex items-center justify-center gap-2 rounded-full border px-6 py-3 text-sm font-semibold transition"
               >
                 Contact Me
                 <FaEnvelope size={12} />
@@ -161,22 +311,22 @@ export default function HomePage() {
                 href={resumePath}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center rounded-full border border-transparent px-6 py-3 text-sm font-semibold text-slate-700 transition hover:text-slate-950"
+                className="theme-button-ghost inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition"
               >
                 Open Resume
               </a>
             </div>
           </div>
 
-          <div className="rounded-[1.75rem] border border-blue-200 bg-blue-50/90 p-6 text-slate-900 shadow-[0_25px_60px_rgba(30,64,175,0.14)]">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-blue-900">
-              Core Focus
+          <div className="theme-accent-panel theme-text-primary rounded-[1.75rem] border p-6">
+            <p className="theme-text-accent-strong text-sm font-semibold uppercase tracking-[0.18em]">
+              What I Like Building
             </p>
             <ul className="mt-6 space-y-3">
               {focusAreas.map((area) => (
                 <li
                   key={area}
-                  className="rounded-2xl border border-blue-100 bg-white px-4 py-4 text-base text-slate-800"
+                  className="theme-accent-card theme-text-primary rounded-2xl border px-4 py-4 text-base"
                 >
                   {area}
                 </li>
@@ -187,20 +337,19 @@ export default function HomePage() {
 
         <section
           id="projects"
-          className="scroll-mt-28 rounded-[2rem] border border-stone-200/70 bg-stone-50/90 px-6 py-10 shadow-[0_24px_70px_rgba(148,163,184,0.16)] md:px-10"
+          className="theme-panel-muted scroll-mt-28 rounded-[2rem] border px-6 py-10 md:px-10"
         >
           <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-teal-700">
+            <p className="theme-text-accent text-sm font-semibold uppercase tracking-[0.18em]">
               Selected Work
             </p>
-            <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              Software engineering projects in backend, data, and web
-              development
+            <h2 className="theme-text-strong mt-3 text-3xl font-black tracking-tight sm:text-4xl">
+              Projects that show how I approach backend, data, and product
+              engineering
             </h2>
-            <p className="mt-4 text-lg leading-8 text-slate-700">
-              These projects highlight experience with Java, Android, MySQL,
-              Next.js, responsive frontend development, and performance-focused
-              engineering decisions.
+            <p className="theme-text-secondary mt-4 text-lg leading-8">
+              Each project card focuses on the implementation details, the
+              technologies involved, and where to review the code.
             </p>
           </div>
 
@@ -208,34 +357,65 @@ export default function HomePage() {
             {projects.map((project) => (
               <article
                 key={project.title}
-                className="grid gap-6 rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[0_16px_40px_rgba(15,23,42,0.06)] lg:grid-cols-[220px_1fr]"
+                className="theme-accent-panel grid gap-6 rounded-[1.75rem] border p-6 lg:grid-cols-[220px_1fr]"
               >
-                <div className="flex flex-col justify-between gap-6 rounded-[1.5rem] bg-[#0f2744] p-5 text-white">
+                <div className="theme-brand-surface flex flex-col justify-between gap-6 rounded-[1.5rem] p-5 text-white">
                   <div>
                     <p className="text-sm font-semibold uppercase tracking-[0.18em] text-blue-200">
                       Project
                     </p>
                     <h3 className="mt-3 text-2xl font-bold">{project.title}</h3>
-                    <p className="mt-2 text-base text-slate-300">
+                    <p className="theme-text-on-brand-muted mt-2 text-base leading-7">
                       {project.summary}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {project.stack.map((item) => (
-                      <span
-                        key={item}
-                        className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-stone-100"
-                      >
-                        {item}
-                      </span>
-                    ))}
+                    {project.stack.map((item) => {
+                      const Icon = item.icon;
+
+                      return (
+                        <span
+                          key={item.label}
+                          className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-stone-100"
+                        >
+                          <span
+                            className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${item.accentClassName}`}
+                          >
+                            <Icon size={12} />
+                          </span>
+                          {item.label}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
 
-                <div className="space-y-4 text-base leading-8 text-slate-700">
-                  {project.details.map((detail) => (
-                    <p key={detail}>{detail}</p>
-                  ))}
+                <div className="space-y-5">
+                  {project.repoUrl ? (
+                    <div className="flex flex-wrap gap-3">
+                      <a
+                        href={project.repoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="theme-button-secondary inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition"
+                      >
+                        <FaGithub size={16} />
+                        View Repository
+                      </a>
+                    </div>
+                  ) : null}
+
+                  <ul className="space-y-3">
+                    {project.details.map((detail) => (
+                      <li
+                        key={detail}
+                        className="theme-text-secondary flex gap-3 text-base leading-7"
+                      >
+                        <span className="mt-3 h-2.5 w-2.5 flex-none rounded-full bg-[var(--text-accent)]" />
+                        <span>{detail}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </article>
             ))}
@@ -243,29 +423,95 @@ export default function HomePage() {
         </section>
 
         <section
-          id="about"
-          className="scroll-mt-28 grid gap-6 rounded-[2rem] border border-stone-200/70 bg-white/90 px-6 py-10 shadow-[0_24px_70px_rgba(15,23,42,0.08)] md:px-10 lg:grid-cols-[1.1fr_0.9fr]"
+          id="stack"
+          className="theme-panel scroll-mt-28 rounded-[2rem] border px-6 py-10 md:px-10"
         >
-          <div className="space-y-5">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-blue-700">
-              About
+          <div className="max-w-3xl">
+            <p className="theme-text-accent text-sm font-semibold uppercase tracking-[0.18em]">
+              Tech Stack
             </p>
-            <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              Backend-focused software engineer building reliable, practical
-              systems
+            <h2 className="theme-text-strong mt-3 text-3xl font-black tracking-tight sm:text-4xl">
+              Technologies I reach for most often
             </h2>
-            <p className="text-lg leading-8 text-slate-700">
-              New graduate software engineer with experience in backend
-              development, data-driven systems, and workflow automation. Strong
-              foundation in data structures, algorithms, and object-oriented
-              programming. Proven ability to improve efficiency, process
-              high-volume datasets, and build scalable applications.
+            <p className="theme-text-secondary mt-4 text-lg leading-8">
+              Recognizable tooling makes the page easier to scan, so the stack
+              is called out explicitly instead of being buried in plain text.
             </p>
           </div>
 
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {techHighlights.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <article
+                  key={item.label}
+                  className="theme-accent-panel rounded-[1.5rem] border p-5"
+                >
+                  <span
+                    className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl ${item.accentClassName}`}
+                  >
+                    <Icon size={24} />
+                  </span>
+                  <p className="theme-text-muted mt-5 text-sm font-semibold uppercase tracking-[0.16em]">
+                    {item.category}
+                  </p>
+                  <h3 className="theme-text-strong mt-2 text-xl font-bold">
+                    {item.label}
+                  </h3>
+                  <p className="theme-text-secondary mt-3 text-sm leading-7">
+                    {item.description}
+                  </p>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
+        <section
+          id="about"
+          className="theme-panel scroll-mt-28 grid gap-6 rounded-[2rem] border px-6 py-10 md:px-10 lg:grid-cols-[1.1fr_0.9fr]"
+        >
+          <div className="space-y-5">
+            <p className="theme-text-accent text-sm font-semibold uppercase tracking-[0.18em]">
+              About
+            </p>
+            <h2 className="theme-text-strong text-3xl font-black tracking-tight sm:text-4xl">
+              I like turning complex workflows and raw data into tools people
+              can actually use
+            </h2>
+            <p className="theme-text-secondary text-lg leading-8">
+              I am a software engineer with a strong interest in backend
+              systems, automation, and data-driven products. I enjoy building
+              the parts of a product that make everything else easier: reliable
+              APIs, clean data models, and interfaces that help people move
+              faster.
+            </p>
+            <p className="theme-text-secondary text-lg leading-8">
+              The work I gravitate toward usually starts with ambiguity. There
+              is a process that feels too manual, a dataset that is difficult to
+              explore, or a product flow that needs to become clearer and more
+              dependable. That is the kind of problem space I want to keep
+              working in.
+            </p>
+
+            <div className="theme-accent-panel space-y-3 rounded-[1.5rem] border p-5">
+              {aboutHighlights.map((item) => (
+                <div key={item.label} className="space-y-1">
+                  <p className="theme-text-muted text-sm font-semibold uppercase tracking-[0.16em]">
+                    {item.label}
+                  </p>
+                  <p className="theme-text-secondary text-base leading-7">
+                    {item.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="flex items-start">
-            <div className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
-              <div className="flex flex-col gap-3 border-b border-blue-200 bg-[#0f2744] p-5 text-white sm:flex-row sm:items-center sm:justify-between">
+            <div className="theme-card overflow-hidden rounded-[1.5rem] border">
+              <div className="theme-brand-surface theme-border-accent flex flex-col gap-3 border-b p-5 text-white sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-[0.16em] text-blue-200">
                     Resume Preview
@@ -275,17 +521,17 @@ export default function HomePage() {
                   href={resumePath}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
+                  className="theme-button-contrast inline-flex rounded-full px-5 py-3 text-sm font-semibold transition"
                 >
                   Open Full Resume
                 </a>
               </div>
-              <div className="bg-stone-100 p-3">
+              <div className="theme-card-muted p-3">
                 <a
                   href={resumePath}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block overflow-hidden rounded-[1rem] border border-slate-200 bg-white transition hover:opacity-95"
+                  className="theme-border-default block overflow-hidden rounded-[1rem] border bg-[var(--surface-panel-solid)] transition hover:opacity-95"
                 >
                   <Image
                     src={resumePreviewPath}
@@ -302,155 +548,184 @@ export default function HomePage() {
 
         <section
           id="contact"
-          className="scroll-mt-28 grid gap-6 rounded-[2rem] border border-stone-200/70 bg-[#eff6ff]/90 px-6 py-10 shadow-[0_24px_70px_rgba(59,130,246,0.14)] md:px-10 lg:grid-cols-[0.9fr_1.1fr]"
+          className="theme-contact-panel scroll-mt-28 grid gap-6 rounded-[2rem] border px-6 py-10 md:px-10 lg:grid-cols-[0.9fr_1.1fr]"
         >
           <div className="space-y-5">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-blue-700">
+            <p className="theme-text-accent text-sm font-semibold uppercase tracking-[0.18em]">
               Contact
             </p>
-            <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+            <h2 className="theme-text-strong text-3xl font-black tracking-tight sm:text-4xl">
               Reach out for software engineering roles, collaborations, or
               technical conversations
             </h2>
-            <p className="text-lg leading-8 text-slate-700">
-              The fastest way to reach me is directly by email or LinkedIn. The
-              form below is available when email delivery is configured on the
-              deployment.
+            <p className="theme-text-secondary text-lg leading-8">
+              {contactFormEnabled
+                ? "Email is usually the fastest way to reach me, but you can also use the form for a quick introduction, project discussion, or role opportunity."
+                : "Email or LinkedIn is the fastest way to reach me for interviews, projects, or technical conversations."}
             </p>
 
-            <div className="space-y-3 rounded-[1.5rem] border border-blue-200 bg-white p-5">
+            <div className="theme-accent-panel space-y-3 rounded-[1.5rem] border p-5">
               <a
                 href="mailto:kaan.kaya.dev@gmail.com"
-                className="block text-lg font-semibold text-slate-900 transition hover:text-blue-700"
+                className="theme-text-primary theme-link-accent inline-flex items-center gap-3 text-lg font-semibold transition"
               >
+                <FaEnvelope size={18} />
                 kaan.kaya.dev@gmail.com
               </a>
               <a
-                href="tel:+16472812725"
-                className="block text-lg font-semibold text-slate-900 transition hover:text-blue-700"
+                href="https://www.linkedin.com/in/kaankaya7/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="theme-text-primary theme-link-accent inline-flex items-center gap-3 text-lg font-semibold transition"
               >
-                +1 (647) 281-2725
+                <FaLinkedin size={18} />
+                linkedin.com/in/kaankaya7
               </a>
-              <div className="flex gap-4 pt-2">
-                <a
-                  href="https://github.com/kaya-kaan"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:border-slate-950"
+              <a
+                href="https://github.com/kaya-kaan"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="theme-text-primary theme-link-accent inline-flex items-center gap-3 text-lg font-semibold transition"
+              >
+                <FaGithub size={18} />
+                github.com/kaya-kaan
+              </a>
+            </div>
+          </div>
+
+          {contactFormEnabled ? (
+            <form
+              onSubmit={handleSubmit}
+              className="theme-card rounded-[1.75rem] border p-6"
+            >
+              <h3 className="theme-text-strong text-2xl font-bold">
+                Send a message
+              </h3>
+              <p className="theme-text-muted mt-2 text-sm leading-7">
+                Use the form for a quick introduction, project inquiry, or role
+                discussion.
+              </p>
+
+              <div className="mt-6 space-y-4">
+                <div className="space-y-2">
+                  <label
+                    htmlFor="contact-name"
+                    className="theme-text-secondary block text-sm font-semibold"
+                  >
+                    Name
+                  </label>
+                  <input
+                    id="contact-name"
+                    name="name"
+                    type="text"
+                    autoComplete="name"
+                    maxLength={80}
+                    placeholder="Your name"
+                    className="theme-input w-full rounded-2xl border px-4 py-3 outline-none transition"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label
+                    htmlFor="contact-email"
+                    className="theme-text-secondary block text-sm font-semibold"
+                  >
+                    Email
+                  </label>
+                  <input
+                    id="contact-email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    maxLength={254}
+                    placeholder="Your email"
+                    className="theme-input w-full rounded-2xl border px-4 py-3 outline-none transition"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label
+                    htmlFor="contact-message"
+                    className="theme-text-secondary block text-sm font-semibold"
+                  >
+                    Message
+                  </label>
+                  <textarea
+                    id="contact-message"
+                    name="message"
+                    maxLength={2000}
+                    placeholder="Your message..."
+                    className="theme-input min-h-40 w-full rounded-2xl border px-4 py-3 outline-none transition"
+                    rows={6}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="theme-button-primary inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition"
                 >
-                  <FaGithub size={16} />
-                  GitHub
+                  {isSubmitting ? "Sending..." : "Send Message"}
+                </button>
+                <p className="theme-text-muted text-sm leading-6">
+                  Prefer direct contact? Email is usually fastest.
+                </p>
+              </div>
+
+              {status ? (
+                <p
+                  className={`mt-4 rounded-2xl px-4 py-3 text-sm font-medium ${
+                    status.tone === "success"
+                      ? "theme-status-success"
+                      : "theme-status-error"
+                  }`}
+                >
+                  {status.message}
+                </p>
+              ) : null}
+            </form>
+          ) : (
+            <div className="theme-card flex h-full flex-col justify-between rounded-[1.75rem] border p-6">
+              <div>
+                <h3 className="theme-text-strong text-2xl font-bold">
+                  Start a conversation
+                </h3>
+                <p className="theme-text-secondary mt-3 text-base leading-8">
+                  If you are hiring, want to discuss a project, or just want to
+                  talk through the code behind these builds, email is the best
+                  starting point and LinkedIn works well too.
+                </p>
+              </div>
+
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <a
+                  href="mailto:kaan.kaya.dev@gmail.com"
+                  className="theme-button-primary inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition"
+                >
+                  <FaEnvelope size={14} />
+                  Email Kaan
                 </a>
                 <a
                   href="https://www.linkedin.com/in/kaankaya7/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:border-slate-950"
+                  className="theme-button-secondary inline-flex items-center justify-center gap-2 rounded-full border px-6 py-3 text-sm font-semibold transition"
                 >
-                  <FaLinkedin size={16} />
-                  LinkedIn
+                  <FaLinkedin size={14} />
+                  Message on LinkedIn
                 </a>
               </div>
             </div>
-          </div>
-
-          <form
-            onSubmit={handleSubmit}
-            className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[0_16px_40px_rgba(15,23,42,0.06)]"
-          >
-            <h3 className="text-2xl font-bold text-slate-950">Send a message</h3>
-            <p className="mt-2 text-sm leading-7 text-slate-600">
-              Use the form for a quick introduction, project inquiry, or role
-              discussion.
-            </p>
-
-            <div className="mt-6 space-y-4">
-              <div className="space-y-2">
-                <label
-                  htmlFor="contact-name"
-                  className="block text-sm font-semibold text-slate-700"
-                >
-                  Name
-                </label>
-                <input
-                  id="contact-name"
-                  name="name"
-                  type="text"
-                  autoComplete="name"
-                  maxLength={80}
-                  placeholder="Your name"
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-950"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label
-                  htmlFor="contact-email"
-                  className="block text-sm font-semibold text-slate-700"
-                >
-                  Email
-                </label>
-                <input
-                  id="contact-email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  maxLength={254}
-                  placeholder="Your email"
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-950"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label
-                  htmlFor="contact-message"
-                  className="block text-sm font-semibold text-slate-700"
-                >
-                  Message
-                </label>
-                <textarea
-                  id="contact-message"
-                  name="message"
-                  maxLength={2000}
-                  placeholder="Your message..."
-                  className="min-h-40 w-full rounded-2xl border border-slate-200 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-950"
-                  rows={6}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="inline-flex items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
-              >
-                {isSubmitting ? "Sending..." : "Send Message"}
-              </button>
-              <p className="text-sm leading-6 text-slate-500">
-                Prefer direct contact? Email is usually fastest.
-              </p>
-            </div>
-
-            {status ? (
-              <p
-                className={`mt-4 rounded-2xl px-4 py-3 text-sm font-medium ${
-                  status.tone === "success"
-                    ? "bg-emerald-50 text-emerald-700"
-                    : "bg-rose-50 text-rose-700"
-                }`}
-              >
-                {status.message}
-              </p>
-            ) : null}
-          </form>
+          )}
         </section>
       </main>
     </div>
