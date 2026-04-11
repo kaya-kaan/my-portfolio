@@ -55,17 +55,6 @@ npm run dev
 
 ---
 
-## Environment Variables
-
-Create a `.env.local` file in the root:
-
-```env
-RESEND_API_KEY=your_resend_api_key
-CONTACT_EMAIL=your@email.com
-```
-
----
-
 ## Deployment
 
 The app is containerized with Docker and served via Caddy as a reverse proxy. Caddy handles HTTPS automatically via Let's Encrypt.

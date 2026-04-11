@@ -35,7 +35,7 @@ services:
     depends_on:
       - app
     environment:
-      - TUNNEL_TOKEN=eyJhIjoiMDhlOTFlNjQ4Njk4ZmFhY2Q3YWExNzUwODBiMWEyNDkiLCJ0IjoiODVkMWJhM2UtZWYxOS00Y2QzLWJiODctNzRhOTZkYjZlZmM3IiwicyI6Ik9EVXpZbVEzTURNdFl6UXpOaTAwWldGbUxUbGhaalV0WTJWbVlXVmlZamxpWlRBNCJ9
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
 
 volumes:
   caddy_data:
