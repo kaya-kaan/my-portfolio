@@ -28,6 +28,15 @@ services:
       - caddy_config:/config
     restart: unless-stopped
 
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel run
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      - TUNNEL_TOKEN=eyJhIjoiMDhlOTFlNjQ4Njk4ZmFhY2Q3YWExNzUwODBiMWEyNDkiLCJ0IjoiODVkMWJhM2UtZWYxOS00Y2QzLWJiODctNzRhOTZkYjZlZmM3IiwicyI6Ik9EVXpZbVEzTURNdFl6UXpOaTAwWldGbUxUbGhaalV0WTJWbVlXVmlZamxpWlRBNCJ9
+
 volumes:
   caddy_data:
   caddy_config:

@@ -21,6 +21,8 @@
 # production
 /build
 /mcp-server/dist
+.next/
+out/
 
 # misc
 .DS_Store
@@ -39,3 +41,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# docker
+docker-data/
+.docker/
+docker-volumes/
+
+*.log
+.env.production
+.env.local
+.vscode/
+.idea/
