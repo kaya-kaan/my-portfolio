@@ -13,30 +13,12 @@ services:
       - "3000"
     restart: unless-stopped
 
-  caddy:
-    image: caddy:2.8-alpine
-    depends_on:
-      - app
+  cloudflared:
+    image: cloudflare/cloudflared:2026.3.0
+    command: tunnel --no-autoupdate run
     env_file:
       - .env.production
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    restart: unless-stopped
-
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    command: tunnel run
-    restart: unless-stopped
     depends_on:
       - app
-    environment:
-      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    restart: unless-stopped
 
-volumes:
-  caddy_data:
-  caddy_config:
