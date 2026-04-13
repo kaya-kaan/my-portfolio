@@ -1,6 +1,11 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import {
+  getRequestLogContext,
+  logger,
+  serializeError,
+} from '../../../lib/server/logger';
 
 const MAX_NAME_LENGTH = 80;
 const MAX_EMAIL_LENGTH = 254;
@@ -31,6 +36,11 @@ function escapeHtml(value: string) {
 }
 
 function getClientKey(request: NextRequest) {
+  const cloudflareIp = request.headers.get('cf-connecting-ip');
+  if (cloudflareIp) {
+    return cloudflareIp.trim();
+  }
+
   const forwardedFor = request.headers.get('x-forwarded-for');
   if (forwardedFor) {
     return forwardedFor.split(',')[0]?.trim() || 'unknown';
@@ -39,7 +49,7 @@ function getClientKey(request: NextRequest) {
   return request.headers.get('x-real-ip')?.trim() || 'unknown';
 }
 
-function isRateLimited(request: NextRequest) {
+function isRateLimited(clientKey: string) {
   const now = Date.now();
 
   for (const [key, entry] of rateLimitStore) {
@@ -48,7 +58,6 @@ function isRateLimited(request: NextRequest) {
     }
   }
 
-  const clientKey = getClientKey(request);
   const existingEntry = rateLimitStore.get(clientKey);
 
   if (!existingEntry) {
@@ -69,8 +78,26 @@ function isRateLimited(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const clientKey = getClientKey(request);
+  const requestLogContext = getRequestLogContext(request);
+
+  logger.info({
+    event: 'contact.request_received',
+    ...requestLogContext,
+  });
+
   try {
-    if (isRateLimited(request)) {
+    if (isRateLimited(clientKey)) {
+      logger.warn({
+        event: 'contact.rate_limited',
+        ...requestLogContext,
+        status: 429,
+        meta: {
+          windowMs: RATE_LIMIT_WINDOW_MS,
+          maxRequests: MAX_REQUESTS_PER_WINDOW,
+        },
+      });
+
       return NextResponse.json(
         {
           error: 'Too many messages sent recently. Please wait a few minutes and try again.',
@@ -90,10 +117,31 @@ export async function POST(request: NextRequest) {
     const message = typeof body.message === 'string' ? body.message.trim() : '';
 
     if (!name || !email || !message) {
+      logger.warn({
+        event: 'contact.validation_failed',
+        ...requestLogContext,
+        status: 400,
+        meta: {
+          reason: 'missing_required_fields',
+          hasName: Boolean(name),
+          hasEmail: Boolean(email),
+          hasMessage: Boolean(message),
+        },
+      });
+
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     if (!emailPattern.test(email)) {
+      logger.warn({
+        event: 'contact.validation_failed',
+        ...requestLogContext,
+        status: 400,
+        meta: {
+          reason: 'invalid_email',
+        },
+      });
+
       return NextResponse.json(
         { error: 'Please enter a valid email address.' },
         { status: 400 }
@@ -101,6 +149,17 @@ export async function POST(request: NextRequest) {
     }
 
     if (name.length > MAX_NAME_LENGTH) {
+      logger.warn({
+        event: 'contact.validation_failed',
+        ...requestLogContext,
+        status: 400,
+        meta: {
+          reason: 'name_too_long',
+          nameLength: name.length,
+          maxNameLength: MAX_NAME_LENGTH,
+        },
+      });
+
       return NextResponse.json(
         { error: `Name must be ${MAX_NAME_LENGTH} characters or fewer.` },
         { status: 400 }
@@ -108,6 +167,17 @@ export async function POST(request: NextRequest) {
     }
 
     if (email.length > MAX_EMAIL_LENGTH) {
+      logger.warn({
+        event: 'contact.validation_failed',
+        ...requestLogContext,
+        status: 400,
+        meta: {
+          reason: 'email_too_long',
+          emailLength: email.length,
+          maxEmailLength: MAX_EMAIL_LENGTH,
+        },
+      });
+
       return NextResponse.json(
         { error: `Email must be ${MAX_EMAIL_LENGTH} characters or fewer.` },
         { status: 400 }
@@ -115,6 +185,17 @@ export async function POST(request: NextRequest) {
     }
 
     if (message.length > MAX_MESSAGE_LENGTH) {
+      logger.warn({
+        event: 'contact.validation_failed',
+        ...requestLogContext,
+        status: 400,
+        meta: {
+          reason: 'message_too_long',
+          messageLength: message.length,
+          maxMessageLength: MAX_MESSAGE_LENGTH,
+        },
+      });
+
       return NextResponse.json(
         { error: `Message must be ${MAX_MESSAGE_LENGTH} characters or fewer.` },
         { status: 400 }
@@ -127,6 +208,16 @@ export async function POST(request: NextRequest) {
       RESEND_API_KEY === 'replace_with_new_resend_api_key' ||
       !EMAIL_TO
     ) {
+      logger.error({
+        event: 'contact.delivery_unavailable',
+        ...requestLogContext,
+        status: 503,
+        meta: {
+          hasApiKey: Boolean(RESEND_API_KEY),
+          hasEmailTo: Boolean(EMAIL_TO),
+        },
+      });
+
       return NextResponse.json(
         {
           error:
@@ -158,7 +249,19 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
-      console.error('Resend error:', error);
+      logger.error({
+        event: 'contact.email_send_failed',
+        ...requestLogContext,
+        status: 502,
+        meta: {
+          provider: 'resend',
+          error: error.message || 'Email delivery failed.',
+          nameLength: name.length,
+          emailLength: email.length,
+          messageLength: message.length,
+        },
+      });
+
       return NextResponse.json(
         {
           error: error.message || 'Email delivery failed.',
@@ -167,12 +270,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    logger.info({
+      event: 'contact.email_sent',
+      ...requestLogContext,
+      status: 200,
+      meta: {
+        provider: 'resend',
+        nameLength: name.length,
+        emailLength: email.length,
+        messageLength: message.length,
+      },
+    });
+
     return NextResponse.json({
       success: true,
       message: 'Message sent successfully. I will get back to you soon.',
     });
   } catch (error) {
-    console.error('Error processing contact request:', error);
+    logger.error({
+      event: 'contact.request_failed',
+      ...requestLogContext,
+      status: 500,
+      meta: serializeError(error),
+    });
+
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /mcp-server/node_modules
@@ -11,44 +9,43 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
+# build output
+/.next
+/out
 /build
 /mcp-server/dist
-.next/
-out/
+/coverage
+*.tsbuildinfo
+next-env.d.ts
 
-# misc
-.DS_Store
-*.pem
+# env files
+.env
+.env.*
+!.env.production.example
 
-# debug
+# logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
-/.codex/
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# docker
+# local docker/runtime data
 docker-data/
 .docker/
 docker-volumes/
+.cloudflared/
 
-*.log
-.env.production
-.env.local
+# secrets / certificates
+*.pem
+*.key
+*.crt
+*.p12
+
+# local tooling
 .vscode/
 .idea/
+.codex/
+
+# os files
+.DS_Store

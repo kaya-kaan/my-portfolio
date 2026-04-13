@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FaMoon, FaSun } from "react-icons/fa";
 import { themeStorageKey, type Theme } from "../lib/theme";
 
@@ -24,16 +24,13 @@ const applyTheme = (theme: Theme) => {
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [theme, setTheme] = useState<Theme>("light");
-  const [hasMounted, setHasMounted] = useState(false);
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof document === "undefined") {
+      return "light";
+    }
 
-  useEffect(() => {
-    const rootTheme =
-      document.documentElement.dataset.theme === "dark" ? "dark" : "light";
-
-    setTheme(rootTheme);
-    setHasMounted(true);
-  }, []);
+    return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+  });
 
   const toggleTheme = () => {
     const nextTheme = theme === "dark" ? "light" : "dark";
@@ -48,12 +45,11 @@ export default function Navbar() {
       <button
         type="button"
         onClick={toggleTheme}
-        className={`theme-floating-toggle fixed right-4 top-20 z-[60] inline-flex rounded-full border p-2 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 md:right-6 xl:top-5 xl:right-8 ${
-          hasMounted ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
+        className="theme-floating-toggle fixed right-4 top-20 z-[60] inline-flex rounded-full border p-2 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 md:right-6 xl:right-8 xl:top-5"
         aria-pressed={theme === "dark"}
         aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
         title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+        suppressHydrationWarning
       >
         <span className="theme-switch-track relative flex h-10 w-[4.75rem] items-center justify-between rounded-full border px-2.5">
           <FaSun className="theme-switch-icon" size={12} aria-hidden="true" />

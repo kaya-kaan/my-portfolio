@@ -1,3 +1,18 @@
+{
+    servers {
+        trusted_proxies static private_ranges
+        trusted_proxies_strict
+        client_ip_headers CF-Connecting-IP X-Forwarded-For X-Real-IP
+    }
+}
+
 :80 {
+    encode zstd gzip
+
+    log {
+        output stdout
+        format json
+    }
+
     reverse_proxy app:3000
 }
