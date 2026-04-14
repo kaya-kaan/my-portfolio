@@ -16,7 +16,6 @@ const repoRoot = path.resolve(serverRoot, "..");
 const productionEnvRelativePath = ".env.production";
 const productionEnvPath = path.join(repoRoot, productionEnvRelativePath);
 const productionEnvExamplePath = path.join(repoRoot, ".env.production.example");
-const serviceNames = ["app", "caddy", "cloudflared"] as const;
 const logLineCountSchema = z.number().int().min(1).max(200).default(50);
 const visitCandidateLineCountSchema = z.number().int().min(20).max(400).default(200);
 const visitCandidateLimitSchema = z.number().int().min(1).max(50).default(10);
@@ -77,7 +76,7 @@ type Overview = {
   mcpServerPath: string;
 };
 
-type ServiceName = (typeof serviceNames)[number];
+type ServiceName = "app" | "caddy" | "cloudflared";
 
 type CommandResult = {
   ok: boolean;
@@ -320,6 +319,26 @@ function getHeaderValue(
   return typeof value === "string" ? value : null;
 }
 
+function getClientIp(
+  request: Record<string, unknown>,
+  headers: Record<string, unknown> | undefined,
+) {
+  if (typeof request.client_ip === "string" && request.client_ip) {
+    return request.client_ip;
+  }
+
+  const cloudflareIp = getHeaderValue(headers, "Cf-Connecting-Ip");
+  if (cloudflareIp) {
+    return cloudflareIp;
+  }
+
+  if (typeof request.remote_ip === "string" && request.remote_ip) {
+    return request.remote_ip;
+  }
+
+  return "unknown";
+}
+
 function maskIpAddress(ipAddress: string) {
   if (!ipAddress) {
     return "unknown";
@@ -431,9 +450,7 @@ function extractVisitCandidates(logText: string, limit: number) {
         : undefined;
     const userAgent = getHeaderValue(headers, "User-Agent") ?? "unknown";
     const uri = typeof request.uri === "string" ? request.uri : "/";
-    const maskedIp = maskIpAddress(
-      typeof request.remote_ip === "string" ? request.remote_ip : "unknown",
-    );
+    const maskedIp = maskIpAddress(getClientIp(request, headers));
     const dedupeKey = `${maskedIp}|${userAgent}`;
 
     if (recentCandidates.has(dedupeKey)) {

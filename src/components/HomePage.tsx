@@ -9,14 +9,18 @@ import {
   FaGithub,
   FaJava,
   FaLinkedin,
+  FaRobot,
+  FaServer,
 } from "react-icons/fa";
 import {
   SiAndroid,
+  SiDocker,
   SiGithub,
   SiMysql,
   SiNextdotjs,
   SiReact,
   SiTailwindcss,
+  SiTelegram,
   SiTypescript,
 } from "react-icons/si";
 import Navbar from "./Navbar";
@@ -90,51 +94,72 @@ const stackItems = {
     icon: SiGithub,
     accentClassName: "bg-slate-100 text-slate-700",
   },
+  docker: {
+    label: "Docker Compose",
+    icon: SiDocker,
+    accentClassName: "bg-blue-100 text-blue-700",
+  },
+  mcp: {
+    label: "MCP",
+    icon: FaServer,
+    accentClassName: "bg-violet-100 text-violet-700",
+  },
+  openclaw: {
+    label: "OpenClaw",
+    icon: FaRobot,
+    accentClassName: "bg-rose-100 text-rose-700",
+  },
+  telegram: {
+    label: "Telegram",
+    icon: SiTelegram,
+    accentClassName: "bg-sky-100 text-sky-700",
+  },
 } as const satisfies Record<string, StackItem>;
 
 const projects: Project[] = [
   {
-    title: "Smart Spender",
-    stack: [stackItems.java, stackItems.android],
-    summary:
-      "Android budgeting app for tracking spending, budgets, and category-level financial insights.",
-    details: [
-      "Built an Android application in Java for recording income and expenses across multiple spending categories.",
-      "Implemented budget tracking flows and a dashboard that surfaces spending patterns without making users dig through raw entries.",
-      "Structured the app around modular tracking components so financial data stays consistent across screens and calculations.",
-      "Tested across multiple Android devices and fixed responsiveness and navigation issues uncovered during QA.",
-    ],
-    repoUrl: "https://github.com/atmiya0/SmartSpender_EECS4443",
-  },
-  {
     title: "Portfolio Website",
-    stack: [
-      stackItems.nextjs,
-      stackItems.react,
-      stackItems.tailwind,
-      stackItems.typescript,
-    ],
+    stack: [stackItems.nextjs, stackItems.typescript, stackItems.tailwind],
     summary:
-      "Responsive personal site built to present projects, skills, and contact paths with clean structure and strong UX.",
+      "Self-hosted portfolio site built to showcase projects, technical skills, and experience with a production-oriented deployment setup.",
     details: [
-      "Built the site with Next.js, React, TypeScript, and Tailwind CSS using reusable sections and a fully responsive layout.",
-      "Added SEO metadata, structured data, and optimized image handling so the portfolio is easier to discover and share.",
-      "Integrated a server-backed contact workflow with Resend support and direct-contact fallbacks when delivery is unavailable.",
-      "Designed the content model so projects, links, and stack information can be updated quickly as new work ships.",
+      "Developed a responsive personal portfolio website using Next.js, React, and TypeScript to showcase projects, technical skills, and experience.",
+      "Built reusable and modular UI components with Tailwind CSS, including responsive layouts, theme support, and a consistent mobile-friendly interface.",
+      "Deployed the application behind Cloudflare Tunnel, Docker Compose, and Caddy, creating a self-hosted production setup with origin protection and reverse-proxy routing.",
+      "Implemented a production-ready contact workflow with server-side validation, rate limiting, and email delivery using Resend, along with structured request logging for easier debugging.",
     ],
     repoUrl: "https://github.com/kaya-kaan/my-portfolio",
   },
   {
-    title: "House Hunter Canada",
-    stack: [stackItems.java, stackItems.mysql],
-    summary:
-      "Housing affordability analyzer focused on querying regional housing and income data across Canada.",
-    details: [
-      "Built a Java and MySQL application for exploring housing affordability across regions with structured search filters.",
-      "Designed query flows around income level, geography, and housing type so users can compare the data that matters to them.",
-      "Focused on SQL structure and indexing strategy to keep multi-filter searches responsive as dataset size grows.",
-      "Turned raw housing and income datasets into a more practical search experience instead of static tables or spreadsheets.",
+    title: "AI-Assisted Server Monitoring Tool",
+    stack: [
+      stackItems.typescript,
+      stackItems.mcp,
+      stackItems.openclaw,
+      stackItems.telegram,
     ],
+    summary:
+      "Operational tooling layer for live server inspection and visit alerts using a custom MCP server, OpenClaw, and Telegram.",
+    details: [
+      "Built a read-only Model Context Protocol (MCP) server in TypeScript to expose live server health, Docker Compose status, repository state, and deployment files to an AI agent.",
+      "Integrated the MCP server with a self-hosted OpenClaw agent and Telegram, enabling remote operational queries and server inspection through chat.",
+      "Implemented a log-based watcher that tails Caddy access logs, filters likely human traffic with deterministic heuristics, and sends real-time visit alerts.",
+      "Structured the system to keep public code separate from private runtime state by storing secrets, agent configuration, and production environment files outside the repository.",
+    ],
+    repoUrl: "https://github.com/kaya-kaan/my-portfolio/tree/main/mcp-server",
+  },
+  {
+    title: "Smart Spender",
+    stack: [stackItems.java, stackItems.android],
+    summary:
+      "Android budgeting app built in a team setting to help users track spending, budgets, and category-level financial activity.",
+    details: [
+      "Collaborated in a 4-person Agile team to design and develop a mobile budgeting application with core financial tracking features.",
+      "Implemented income, expense, and budget tracking modules, enabling users to manage multiple financial categories in real time.",
+      "Designed an interactive dashboard to improve financial visibility and user experience.",
+      "Conducted testing across multiple Android devices, identifying and resolving UI and performance issues to ensure consistent usability.",
+    ],
+    repoUrl: "https://github.com/atmiya0/SmartSpender_EECS4443",
   },
 ];
 
@@ -344,12 +369,12 @@ export default function HomePage({ contactFormEnabled }: HomePageProps) {
               Selected Work
             </p>
             <h2 className="theme-text-strong mt-3 text-3xl font-black tracking-tight sm:text-4xl">
-              Projects that show how I approach backend, data, and product
-              engineering
+              Projects that show how I approach web development, operational
+              tooling, and product engineering
             </h2>
             <p className="theme-text-secondary mt-4 text-lg leading-8">
-              Each project card focuses on the implementation details, the
-              technologies involved, and where to review the code.
+              Each project card highlights the implementation work, the stack
+              involved, and the engineering decisions behind the build.
             </p>
           </div>
 

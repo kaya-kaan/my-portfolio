@@ -102,6 +102,23 @@ function getHeaderValue(headers, name) {
   return typeof value === "string" ? value : null;
 }
 
+function getClientIp(request, headers) {
+  if (typeof request?.client_ip === "string" && request.client_ip) {
+    return request.client_ip;
+  }
+
+  const cloudflareIp = getHeaderValue(headers, "Cf-Connecting-Ip");
+  if (cloudflareIp) {
+    return cloudflareIp;
+  }
+
+  if (typeof request?.remote_ip === "string" && request.remote_ip) {
+    return request.remote_ip;
+  }
+
+  return "";
+}
+
 function getPathName(uri) {
   try {
     return new URL(uri, "http://localhost").pathname;
@@ -232,9 +249,7 @@ function extractVisitCandidate(entry) {
     return null;
   }
 
-  const maskedIp = maskIpAddress(
-    typeof request.remote_ip === "string" ? request.remote_ip : "",
-  );
+  const maskedIp = maskIpAddress(getClientIp(request, headers));
   const referrer = getHeaderValue(headers, "Referer");
   const country = getHeaderValue(headers, "Cf-Ipcountry");
   const timestampValue =
