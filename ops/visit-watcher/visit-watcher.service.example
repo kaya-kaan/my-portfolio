@@ -1,0 +1,15 @@
+[Unit]
+Description=Portfolio visit watcher
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/kaan/my-portfolio
+EnvironmentFile=/home/kaan/.config/personal-agent/visit-watcher.env
+ExecStart=/home/kaan/.openclaw/tools/node/bin/node /home/kaan/my-portfolio/ops/visit-watcher/index.mjs
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
