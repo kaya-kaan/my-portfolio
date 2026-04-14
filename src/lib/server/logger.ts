@@ -91,7 +91,7 @@ function getRequestId(request: NextRequest) {
 export function getRequestLogContext(request: NextRequest): RequestLogContext {
   const clientIp = getClientIp(request);
 
-  return compactRecord({
+  return {
     requestId: getRequestId(request),
     method: request.method,
     path: request.nextUrl.pathname,
@@ -99,7 +99,7 @@ export function getRequestLogContext(request: NextRequest): RequestLogContext {
     userAgent: truncateText(request.headers.get("user-agent"), 160),
     cfRay: request.headers.get("cf-ray")?.trim() || undefined,
     country: request.headers.get("cf-ipcountry")?.trim() || undefined,
-  });
+  };
 }
 
 export function serializeError(error: unknown) {

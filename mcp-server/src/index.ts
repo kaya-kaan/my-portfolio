@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,6 +13,25 @@ const execFileAsync = promisify(execFile);
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 const serverRoot = path.resolve(currentDir, "..");
 const repoRoot = path.resolve(serverRoot, "..");
+const productionEnvRelativePath = ".env.production";
+const productionEnvPath = path.join(repoRoot, productionEnvRelativePath);
+const productionEnvExamplePath = path.join(repoRoot, ".env.production.example");
+const serviceNames = ["app", "caddy", "cloudflared"] as const;
+const logLineCountSchema = z.number().int().min(1).max(200).default(50);
+const visitCandidateLineCountSchema = z.number().int().min(20).max(400).default(200);
+const visitCandidateLimitSchema = z.number().int().min(1).max(50).default(10);
+const assetRequestPattern =
+  /\.(?:avif|bmp|css|eot|gif|ico|jpeg|jpg|js|json|map|mjs|mp4|otf|pdf|png|svg|ttf|txt|webm|webmanifest|webp|woff2?|xml)$/i;
+const botUserAgentPattern =
+  /\b(bot|crawler|spider|headless|lighthouse|curl|wget|python|go-http-client|monitor|uptime|check|scanner|fetch|slurp|preview|facebookexternalhit|bingpreview)\b/i;
+const ignoredPathPrefixes = [
+  "/_next",
+  "/api",
+  "/favicon",
+  "/robots.txt",
+  "/sitemap",
+  "/apple-touch-icon",
+] as const;
 
 const readableFilePaths = [
   "package.json",
@@ -57,6 +76,50 @@ type Overview = {
   seoFiles: string[];
   mcpServerPath: string;
 };
+
+type ServiceName = (typeof serviceNames)[number];
+
+type CommandResult = {
+  ok: boolean;
+  command: string;
+  stdout: string;
+  stderr: string;
+};
+
+type VisitCandidate = {
+  timestamp: string;
+  path: string;
+  method: string;
+  status: number;
+  ip: string;
+  userAgent: string;
+  referrer: string | null;
+  country: string | null;
+};
+
+type LogInput = {
+  lines: number;
+};
+
+type VisitCandidateInput = {
+  lines: number;
+  limit: number;
+};
+
+type ReadProjectFileInput = {
+  path: (typeof readableFilePaths)[number];
+};
+
+type ReviewFocus = "seo" | "deployment" | "content" | "overall";
+
+async function fileExists(filePath: string) {
+  try {
+    await access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 async function readTextFile(relativePath: string) {
   return readFile(path.join(repoRoot, relativePath), "utf8");
@@ -104,35 +167,77 @@ async function runGitStatus() {
   const { stdout } = await execFileAsync(
     "git",
     ["status", "--short", "--branch"],
-    { cwd: repoRoot },
+    { cwd: repoRoot, maxBuffer: 1024 * 1024 * 4 },
   );
 
   return stdout.trim() || "Working tree is clean.";
 }
 
-async function runDockerComposeStatus() {
+async function getDockerComposeBaseArgs() {
+  const args = ["compose"];
+
+  if (await fileExists(productionEnvPath)) {
+    args.push("--env-file", productionEnvRelativePath);
+  }
+
+  return args;
+}
+
+async function runDockerComposeCommand(args: string[]): Promise<CommandResult> {
+  const dockerArgs = [...(await getDockerComposeBaseArgs()), ...args];
+  const command = ["docker", ...dockerArgs].join(" ");
+
   try {
-    const { stdout, stderr } = await execFileAsync(
-      "docker",
-      ["compose", "ps", "--format", "json"],
-      { cwd: repoRoot },
-    );
+    const { stdout, stderr } = await execFileAsync("docker", dockerArgs, {
+      cwd: repoRoot,
+      maxBuffer: 1024 * 1024 * 8,
+    });
 
     return {
       ok: true,
-      stdout: stdout.trim() || "No running services reported.",
+      command,
+      stdout: stdout.trim() || "No output reported.",
       stderr: stderr.trim() || "",
     };
   } catch (error) {
+    const stderr =
+      typeof error === "object" &&
+      error !== null &&
+      "stderr" in error &&
+      typeof error.stderr === "string"
+        ? error.stderr.trim()
+        : "";
+    const stdout =
+      typeof error === "object" &&
+      error !== null &&
+      "stdout" in error &&
+      typeof error.stdout === "string"
+        ? error.stdout.trim()
+        : "";
     const message =
       error instanceof Error ? error.message : "Unknown docker compose error.";
 
     return {
       ok: false,
-      stdout: "",
-      stderr: message,
+      command,
+      stdout,
+      stderr: stderr || message,
     };
   }
+}
+
+async function runDockerComposeStatus() {
+  return runDockerComposeCommand(["ps", "--format", "json"]);
+}
+
+async function getRecentServiceLogs(service: ServiceName, lines: number) {
+  return runDockerComposeCommand([
+    "logs",
+    "--no-log-prefix",
+    "--tail",
+    String(lines),
+    service,
+  ]);
 }
 
 function getSystemHealth() {
@@ -150,6 +255,208 @@ function getSystemHealth() {
     freeMemoryMb: Math.round(freeMemory / 1024 / 1024),
     usedMemoryMb: Math.round((totalMemory - freeMemory) / 1024 / 1024),
   };
+}
+
+function parseEnvKeys(contents: string) {
+  return contents
+    .split(/\r?\n/u)
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith("#"))
+    .flatMap((line) => {
+      const match = line.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=/u);
+      return match ? [match[1]] : [];
+    });
+}
+
+async function getPortfolioEnvStatus() {
+  const [productionExists, exampleExists] = await Promise.all([
+    fileExists(productionEnvPath),
+    fileExists(productionEnvExamplePath),
+  ]);
+
+  const [productionContents, exampleContents] = await Promise.all([
+    productionExists ? readFile(productionEnvPath, "utf8") : Promise.resolve(""),
+    exampleExists
+      ? readFile(productionEnvExamplePath, "utf8")
+      : Promise.resolve(""),
+  ]);
+
+  const requiredKeys = [...new Set(parseEnvKeys(exampleContents))].sort();
+  const presentKeys = [...new Set(parseEnvKeys(productionContents))].sort();
+  const missingKeys = requiredKeys.filter((key) => !presentKeys.includes(key));
+  const extraKeys = presentKeys.filter((key) => !requiredKeys.includes(key));
+
+  return {
+    productionEnvExists: productionExists,
+    productionEnvPath: productionEnvRelativePath,
+    exampleEnvExists: exampleExists,
+    exampleEnvPath: ".env.production.example",
+    requiredKeys,
+    presentKeys,
+    missingKeys,
+    extraKeys,
+  };
+}
+
+function parseLogEntry(line: string) {
+  try {
+    return JSON.parse(line) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+function getHeaderValue(
+  headers: Record<string, unknown> | undefined,
+  headerName: string,
+) {
+  const value = headers?.[headerName];
+
+  if (Array.isArray(value)) {
+    const firstValue = value[0];
+    return typeof firstValue === "string" ? firstValue : null;
+  }
+
+  return typeof value === "string" ? value : null;
+}
+
+function maskIpAddress(ipAddress: string) {
+  if (!ipAddress) {
+    return "unknown";
+  }
+
+  if (ipAddress.includes(".")) {
+    const octets = ipAddress.split(".");
+
+    if (octets.length === 4) {
+      return `${octets[0]}.${octets[1]}.${octets[2]}.0`;
+    }
+  }
+
+  if (ipAddress.includes(":")) {
+    const segments = ipAddress.split(":");
+    return `${segments.slice(0, 4).join(":")}:0000:0000:0000:0000`;
+  }
+
+  return ipAddress;
+}
+
+function getRequestPath(uri: string) {
+  try {
+    return new URL(uri, "http://localhost").pathname;
+  } catch {
+    return uri.split("?")[0] ?? uri;
+  }
+}
+
+function isLikelyHumanRequest(entry: Record<string, unknown>) {
+  const request =
+    typeof entry.request === "object" && entry.request !== null
+      ? (entry.request as Record<string, unknown>)
+      : null;
+
+  if (!request) {
+    return false;
+  }
+
+  const method = typeof request.method === "string" ? request.method : "";
+  const uri = typeof request.uri === "string" ? request.uri : "";
+  const pathName = getRequestPath(uri);
+
+  if (method !== "GET" || !pathName || assetRequestPattern.test(pathName)) {
+    return false;
+  }
+
+  if (ignoredPathPrefixes.some((prefix) => pathName.startsWith(prefix))) {
+    return false;
+  }
+
+  const headers =
+    typeof request.headers === "object" && request.headers !== null
+      ? (request.headers as Record<string, unknown>)
+      : undefined;
+  const userAgent = getHeaderValue(headers, "User-Agent") ?? "";
+
+  if (!userAgent || botUserAgentPattern.test(userAgent)) {
+    return false;
+  }
+
+  const accept = getHeaderValue(headers, "Accept") ?? "";
+  const secFetchDest = getHeaderValue(headers, "Sec-Fetch-Dest") ?? "";
+  return accept.includes("text/html") || secFetchDest === "document";
+}
+
+function getTimestampIso(entry: Record<string, unknown>) {
+  if (typeof entry.ts === "number") {
+    return new Date(entry.ts * 1000).toISOString();
+  }
+
+  if (typeof entry.ts === "string") {
+    const parsed = new Date(entry.ts);
+
+    if (!Number.isNaN(parsed.valueOf())) {
+      return parsed.toISOString();
+    }
+  }
+
+  return new Date().toISOString();
+}
+
+function extractVisitCandidates(logText: string, limit: number) {
+  const recentCandidates = new Map<string, VisitCandidate>();
+
+  for (const line of logText.split(/\r?\n/u).reverse()) {
+    if (!line.trim()) {
+      continue;
+    }
+
+    const entry = parseLogEntry(line);
+
+    if (!entry || !isLikelyHumanRequest(entry)) {
+      continue;
+    }
+
+    const request =
+      typeof entry.request === "object" && entry.request !== null
+        ? (entry.request as Record<string, unknown>)
+        : null;
+
+    if (!request) {
+      continue;
+    }
+
+    const headers =
+      typeof request.headers === "object" && request.headers !== null
+        ? (request.headers as Record<string, unknown>)
+        : undefined;
+    const userAgent = getHeaderValue(headers, "User-Agent") ?? "unknown";
+    const uri = typeof request.uri === "string" ? request.uri : "/";
+    const maskedIp = maskIpAddress(
+      typeof request.remote_ip === "string" ? request.remote_ip : "unknown",
+    );
+    const dedupeKey = `${maskedIp}|${userAgent}`;
+
+    if (recentCandidates.has(dedupeKey)) {
+      continue;
+    }
+
+    recentCandidates.set(dedupeKey, {
+      timestamp: getTimestampIso(entry),
+      path: getRequestPath(uri),
+      method: typeof request.method === "string" ? request.method : "GET",
+      status: typeof entry.status === "number" ? entry.status : 0,
+      ip: maskedIp,
+      userAgent,
+      referrer: getHeaderValue(headers, "Referer"),
+      country: getHeaderValue(headers, "Cf-Ipcountry"),
+    });
+
+    if (recentCandidates.size >= limit) {
+      break;
+    }
+  }
+
+  return [...recentCandidates.values()];
 }
 
 function asTextResult(value: unknown) {
@@ -179,7 +486,7 @@ server.registerTool(
       scripts: z.array(z.string()),
       dependencies: z.array(z.string()),
       devDependencies: z.array(z.string()),
-      deploymentFiles: z.record(z.boolean()),
+      deploymentFiles: z.record(z.string(), z.boolean()),
       seoFiles: z.array(z.string()),
       mcpServerPath: z.string(),
     },
@@ -265,9 +572,137 @@ server.registerTool(
     }
 
     return asTextResult({
+      command: result.command,
       status: result.stdout,
       stderr: result.stderr,
     });
+  },
+);
+
+server.registerTool(
+  "get_recent_caddy_logs",
+  {
+    title: "Recent Caddy Logs",
+    description:
+      "Return recent Caddy container logs from the production portfolio stack.",
+    inputSchema: {
+      lines: logLineCountSchema,
+    },
+  },
+  async ({ lines }: LogInput) => {
+    const result = await getRecentServiceLogs("caddy", lines);
+
+    if (!result.ok) {
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: `Caddy logs unavailable: ${result.stderr}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    return asTextResult({
+      command: result.command,
+      service: "caddy",
+      linesRequested: lines,
+      log: result.stdout,
+      stderr: result.stderr,
+    });
+  },
+);
+
+server.registerTool(
+  "get_recent_app_logs",
+  {
+    title: "Recent App Logs",
+    description:
+      "Return recent Next.js application logs from the production portfolio stack.",
+    inputSchema: {
+      lines: logLineCountSchema,
+    },
+  },
+  async ({ lines }: LogInput) => {
+    const result = await getRecentServiceLogs("app", lines);
+
+    if (!result.ok) {
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: `App logs unavailable: ${result.stderr}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    return asTextResult({
+      command: result.command,
+      service: "app",
+      linesRequested: lines,
+      log: result.stdout,
+      stderr: result.stderr,
+    });
+  },
+);
+
+server.registerTool(
+  "get_recent_visit_candidates",
+  {
+    title: "Recent Visit Candidates",
+    description:
+      "Extract likely human page visits from recent Caddy access logs using simple heuristics.",
+    inputSchema: {
+      lines: visitCandidateLineCountSchema,
+      limit: visitCandidateLimitSchema,
+    },
+  },
+  async ({ lines, limit }: VisitCandidateInput) => {
+    const result = await getRecentServiceLogs("caddy", lines);
+
+    if (!result.ok) {
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: `Visit candidates unavailable: ${result.stderr}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    const candidates = extractVisitCandidates(result.stdout, limit);
+    const payload = {
+      command: result.command,
+      linesInspected: lines,
+      candidates,
+    };
+
+    return {
+      ...asTextResult(payload),
+      structuredContent: payload,
+    };
+  },
+);
+
+server.registerTool(
+  "get_portfolio_env_status",
+  {
+    title: "Portfolio Env Status",
+    description:
+      "Compare .env.production against the tracked example file without exposing secret values.",
+  },
+  async () => {
+    const envStatus = await getPortfolioEnvStatus();
+
+    return {
+      ...asTextResult(envStatus),
+      structuredContent: envStatus,
+    };
   },
 );
 
@@ -280,7 +715,7 @@ server.registerTool(
       path: z.enum(readableFilePaths),
     },
   },
-  async ({ path: requestedPath }) => {
+  async ({ path: requestedPath }: ReadProjectFileInput) => {
     const relativePath = readableFiles[requestedPath];
     const contents = await readTextFile(relativePath);
 
@@ -303,7 +738,7 @@ server.registerResource(
     description: "Reference data about the portfolio repo and deployment stack.",
     mimeType: "application/json",
   },
-  async (uri) => ({
+  async (uri: URL) => ({
     contents: [
       {
         uri: uri.href,
@@ -322,7 +757,7 @@ server.registerResource(
     description: "List the SEO-related files in the portfolio app.",
     mimeType: "application/json",
   },
-  async (uri) => ({
+  async (uri: URL) => ({
     contents: [
       {
         uri: uri.href,
@@ -356,7 +791,7 @@ server.registerPrompt(
         .default("overall"),
     },
   },
-  ({ focus }) => ({
+  ({ focus }: { focus: ReviewFocus }) => ({
     messages: [
       {
         role: "user",

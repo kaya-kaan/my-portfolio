@@ -4,7 +4,7 @@ This is a small read-only MCP server for the portfolio repository.
 
 It exposes:
 
-- tools for repo status, system health, Docker Compose status, and reading key project files
+- tools for repo status, system health, production-aware Docker Compose status, recent service logs, likely visit candidates, env-key status, and reading key project files
 - resources for portfolio overview and SEO-related file inventory
 - a reusable prompt for reviewing the portfolio site
 
@@ -24,6 +24,10 @@ Connect this server over stdio from an MCP-capable client and start with:
 - `get_repo_status`
 - `get_system_health`
 - `get_compose_status`
+- `get_recent_caddy_logs`
+- `get_recent_app_logs`
+- `get_recent_visit_candidates`
+- `get_portfolio_env_status`
 - `read_project_file`
 
 ## Notes
