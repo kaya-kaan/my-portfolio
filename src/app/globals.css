@@ -167,6 +167,24 @@ body {
   min-height: 100vh;
   background: var(--page-background);
   color: var(--text-primary);
+  font-family:
+    "Aptos",
+    "Segoe UI",
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family:
+    "Cascadia Code",
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
 }
 
 body::before {

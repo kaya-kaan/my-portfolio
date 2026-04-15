@@ -58,13 +58,3 @@ export const getSiteUrl = () => {
 
   return undefined;
 };
-
-export const hasContactFormConfig = () => {
-  const { RESEND_API_KEY, EMAIL_TO } = process.env;
-
-  return Boolean(
-    RESEND_API_KEY &&
-      RESEND_API_KEY !== "replace_with_new_resend_api_key" &&
-      EMAIL_TO,
-  );
-};

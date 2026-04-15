@@ -11,7 +11,11 @@ const MAX_NAME_LENGTH = 80;
 const MAX_EMAIL_LENGTH = 254;
 const MAX_MESSAGE_LENGTH = 2000;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
-const MAX_REQUESTS_PER_WINDOW = 5;
+const MAX_REQUESTS_PER_WINDOW = 3;
+const INVALID_RESEND_API_KEYS = new Set([
+  'replace_with_resend_api_key',
+  'replace_with_new_resend_api_key',
+]);
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
@@ -203,11 +207,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { RESEND_API_KEY, EMAIL_FROM, EMAIL_TO } = process.env;
-    if (
-      !RESEND_API_KEY ||
-      RESEND_API_KEY === 'replace_with_new_resend_api_key' ||
-      !EMAIL_TO
-    ) {
+    if (!RESEND_API_KEY || INVALID_RESEND_API_KEYS.has(RESEND_API_KEY) || !EMAIL_TO) {
       logger.error({
         event: 'contact.delivery_unavailable',
         ...requestLogContext,
@@ -264,7 +264,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json(
         {
-          error: error.message || 'Email delivery failed.',
+          error: 'Email delivery failed. Please email me directly instead.',
         },
         { status: 502 }
       );

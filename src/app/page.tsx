@@ -1,8 +1,7 @@
 import HomePage from "../components/HomePage";
-import { getSiteUrl, hasContactFormConfig, siteConfig } from "../lib/site";
+import { getSiteUrl, siteConfig } from "../lib/site";
 
 const siteUrl = getSiteUrl();
-const contactFormEnabled = hasContactFormConfig();
 
 const structuredData = [
   {
@@ -43,7 +42,7 @@ export default function Page() {
           __html: JSON.stringify(structuredData),
         }}
       />
-      <HomePage contactFormEnabled={contactFormEnabled} />
+      <HomePage />
     </>
   );
 }

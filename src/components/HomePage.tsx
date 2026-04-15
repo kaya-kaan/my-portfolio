@@ -49,10 +49,6 @@ type StatusState = {
   message: string;
 } | null;
 
-type HomePageProps = {
-  contactFormEnabled: boolean;
-};
-
 const stackItems = {
   java: {
     label: "Java",
@@ -242,7 +238,7 @@ const aboutHighlights = [
 const resumePath = "/Kaan_Kaya_Resume.pdf";
 const resumePreviewPath = "/resume-preview.png";
 
-export default function HomePage({ contactFormEnabled }: HomePageProps) {
+export default function HomePage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -584,9 +580,9 @@ export default function HomePage({ contactFormEnabled }: HomePageProps) {
               technical conversations
             </h2>
             <p className="theme-text-secondary text-lg leading-8">
-              {contactFormEnabled
-                ? "Email is usually the fastest way to reach me, but you can also use the form for a quick introduction, project discussion, or role opportunity."
-                : "Email or LinkedIn is the fastest way to reach me for interviews, projects, or technical conversations."}
+              Email is usually the fastest way to reach me, and the form below
+              works well for a quick introduction, project discussion, or role
+              opportunity.
             </p>
 
             <div className="theme-accent-panel space-y-3 rounded-[1.5rem] border p-5">
@@ -618,139 +614,124 @@ export default function HomePage({ contactFormEnabled }: HomePageProps) {
             </div>
           </div>
 
-          {contactFormEnabled ? (
-            <form
-              onSubmit={handleSubmit}
-              className="theme-card rounded-[1.75rem] border p-6"
-            >
-              <h3 className="theme-text-strong text-2xl font-bold">
-                Send a message
-              </h3>
-              <p className="theme-text-muted mt-2 text-sm leading-7">
-                Use the form for a quick introduction, project inquiry, or role
-                discussion.
-              </p>
+          <form
+            onSubmit={handleSubmit}
+            className="theme-card rounded-[1.75rem] border p-6"
+          >
+            <h3 className="theme-text-strong text-2xl font-bold">
+              Start a conversation
+            </h3>
+            <p className="theme-text-muted mt-2 text-sm leading-7">
+              Use the form for a quick introduction, project inquiry, or role
+              discussion.
+            </p>
 
-              <div className="mt-6 space-y-4">
-                <div className="space-y-2">
-                  <label
-                    htmlFor="contact-name"
-                    className="theme-text-secondary block text-sm font-semibold"
-                  >
-                    Name
-                  </label>
-                  <input
-                    id="contact-name"
-                    name="name"
-                    type="text"
-                    autoComplete="name"
-                    maxLength={80}
-                    placeholder="Your name"
-                    className="theme-input w-full rounded-2xl border px-4 py-3 outline-none transition"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label
-                    htmlFor="contact-email"
-                    className="theme-text-secondary block text-sm font-semibold"
-                  >
-                    Email
-                  </label>
-                  <input
-                    id="contact-email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    maxLength={254}
-                    placeholder="Your email"
-                    className="theme-input w-full rounded-2xl border px-4 py-3 outline-none transition"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label
-                    htmlFor="contact-message"
-                    className="theme-text-secondary block text-sm font-semibold"
-                  >
-                    Message
-                  </label>
-                  <textarea
-                    id="contact-message"
-                    name="message"
-                    maxLength={2000}
-                    placeholder="Your message..."
-                    className="theme-input min-h-40 w-full rounded-2xl border px-4 py-3 outline-none transition"
-                    rows={6}
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    required
-                  />
-                </div>
+            <div className="mt-6 space-y-4">
+              <div className="space-y-2">
+                <label
+                  htmlFor="contact-name"
+                  className="theme-text-secondary block text-sm font-semibold"
+                >
+                  Name
+                </label>
+                <input
+                  id="contact-name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  maxLength={80}
+                  placeholder="John Doe"
+                  className="theme-input w-full rounded-2xl border px-4 py-3 outline-none transition"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
               </div>
-
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="theme-button-primary inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition"
+              <div className="space-y-2">
+                <label
+                  htmlFor="contact-email"
+                  className="theme-text-secondary block text-sm font-semibold"
                 >
-                  {isSubmitting ? "Sending..." : "Send Message"}
-                </button>
-                <p className="theme-text-muted text-sm leading-6">
-                  Prefer direct contact? Email is usually fastest.
-                </p>
+                  Email
+                </label>
+                <input
+                  id="contact-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  maxLength={254}
+                  placeholder="example@email"
+                  className="theme-input w-full rounded-2xl border px-4 py-3 outline-none transition"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
               </div>
-
-              {status ? (
-                <p
-                  className={`mt-4 rounded-2xl px-4 py-3 text-sm font-medium ${
-                    status.tone === "success"
-                      ? "theme-status-success"
-                      : "theme-status-error"
-                  }`}
+              <div className="space-y-2">
+                <label
+                  htmlFor="contact-message"
+                  className="theme-text-secondary block text-sm font-semibold"
                 >
-                  {status.message}
-                </p>
-              ) : null}
-            </form>
-          ) : (
-            <div className="theme-card flex h-full flex-col justify-between rounded-[1.75rem] border p-6">
-              <div>
-                <h3 className="theme-text-strong text-2xl font-bold">
-                  Start a conversation
-                </h3>
-                <p className="theme-text-secondary mt-3 text-base leading-8">
-                  If you are hiring, want to discuss a project, or just want to
-                  talk through the code behind these builds, email is the best
-                  starting point and LinkedIn works well too.
-                </p>
-              </div>
-
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <a
-                  href="mailto:kaan.kaya.dev@gmail.com"
-                  className="theme-button-primary inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition"
-                >
-                  <FaEnvelope size={14} />
-                  Email Kaan
-                </a>
-                <a
-                  href="https://www.linkedin.com/in/kaankaya7/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="theme-button-secondary inline-flex items-center justify-center gap-2 rounded-full border px-6 py-3 text-sm font-semibold transition"
-                >
-                  <FaLinkedin size={14} />
-                  Message on LinkedIn
-                </a>
+                  Message
+                </label>
+                <textarea
+                  id="contact-message"
+                  name="message"
+                  maxLength={2000}
+                  placeholder="Hi Kaan, I’d like to discuss a backend role / project opportunity."
+                  className="theme-input min-h-40 w-full rounded-2xl border px-4 py-3 outline-none transition"
+                  rows={6}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  required
+                />
               </div>
             </div>
-          )}
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="theme-button-primary inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition"
+              >
+                {isSubmitting ? "Sending..." : "Send Message"}
+              </button>
+              <p className="theme-text-muted text-sm leading-6">
+                Prefer direct contact? Email is usually fastest.
+              </p>
+            </div>
+
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <a
+                href="mailto:kaan.kaya.dev@gmail.com"
+                className="theme-button-secondary inline-flex items-center justify-center gap-2 rounded-full border px-6 py-3 text-sm font-semibold transition"
+              >
+                <FaEnvelope size={14} />
+                Email Kaan
+              </a>
+              <a
+                href="https://www.linkedin.com/in/kaankaya7/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="theme-button-secondary inline-flex items-center justify-center gap-2 rounded-full border px-6 py-3 text-sm font-semibold transition"
+              >
+                <FaLinkedin size={14} />
+                Message on LinkedIn
+              </a>
+            </div>
+
+            {status ? (
+              <p
+                className={`mt-4 rounded-2xl px-4 py-3 text-sm font-medium ${
+                  status.tone === "success"
+                    ? "theme-status-success"
+                    : "theme-status-error"
+                }`}
+              >
+                {status.message}
+              </p>
+            ) : null}
+          </form>
         </section>
       </main>
     </div>
