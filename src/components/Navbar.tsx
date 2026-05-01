@@ -25,11 +25,10 @@ const applyTheme = (theme: Theme) => {
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>("light");
-  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
     const frameId = window.requestAnimationFrame(() => {
-      setHasMounted(true);
+      setTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
     });
 
     return () => {
@@ -37,15 +36,8 @@ export default function Navbar() {
     };
   }, []);
 
-  const resolvedTheme: Theme =
-    hasMounted && typeof document !== "undefined"
-      ? document.documentElement.dataset.theme === "dark"
-        ? "dark"
-        : "light"
-      : theme;
-
   const toggleTheme = () => {
-    const nextTheme = resolvedTheme === "dark" ? "light" : "dark";
+    const nextTheme = theme === "dark" ? "light" : "dark";
 
     applyTheme(nextTheme);
     window.localStorage.setItem(themeStorageKey, nextTheme);
@@ -58,20 +50,20 @@ export default function Navbar() {
         type="button"
         onClick={toggleTheme}
         className="theme-floating-toggle fixed right-4 top-20 z-[60] inline-flex rounded-full border p-2 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 md:right-6 xl:right-8 xl:top-5"
-        aria-pressed={resolvedTheme === "dark"}
-        aria-label={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode`}
-        title={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode`}
+        aria-pressed={theme === "dark"}
+        aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+        title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
       >
         <span className="theme-switch-track relative flex h-10 w-[4.75rem] items-center justify-between rounded-full border px-2.5">
           <FaSun className="theme-switch-icon" size={12} aria-hidden="true" />
           <FaMoon className="theme-switch-icon" size={12} aria-hidden="true" />
           <span
             className={`theme-switch-thumb absolute left-1 top-1 flex h-8 w-8 items-center justify-center rounded-full transition-transform duration-300 ${
-              resolvedTheme === "dark" ? "translate-x-9" : "translate-x-0"
+              theme === "dark" ? "translate-x-9" : "translate-x-0"
             }`}
             aria-hidden="true"
           >
-            {resolvedTheme === "dark" ? <FaMoon size={12} /> : <FaSun size={12} />}
+            {theme === "dark" ? <FaMoon size={12} /> : <FaSun size={12} />}
           </span>
         </span>
       </button>
