@@ -28,7 +28,16 @@ export default function Navbar() {
 
   useEffect(() => {
     const frameId = window.requestAnimationFrame(() => {
-      setTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+      const storedTheme = window.localStorage.getItem(themeStorageKey);
+      const resolvedTheme =
+        storedTheme === "light" || storedTheme === "dark"
+          ? storedTheme
+          : window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+
+      applyTheme(resolvedTheme);
+      setTheme(resolvedTheme);
     });
 
     return () => {

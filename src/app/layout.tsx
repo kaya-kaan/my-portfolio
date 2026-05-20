@@ -1,30 +1,8 @@
 import type { Metadata } from "next";
 import { getSiteUrl, siteConfig } from "../lib/site";
-import { themeStorageKey } from "../lib/theme";
 import "./globals.css";
 
 const siteUrl = getSiteUrl();
-
-const themeInitScript = `
-(() => {
-  try {
-    const storageKey = ${JSON.stringify(themeStorageKey)};
-    const storedTheme = window.localStorage.getItem(storageKey);
-    const resolvedTheme =
-      storedTheme === "light" || storedTheme === "dark"
-        ? storedTheme
-        : window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light";
-
-    const root = document.documentElement;
-    root.dataset.theme = resolvedTheme;
-    root.classList.toggle("dark", resolvedTheme === "dark");
-  } catch {
-    document.documentElement.dataset.theme = "light";
-  }
-})();
-`;
 
 export const metadata: Metadata = {
   metadataBase: siteUrl ? new URL(siteUrl) : undefined,
@@ -92,13 +70,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-CA" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: themeInitScript,
-          }}
-        />
-      </head>
       <body className="antialiased">{children}</body>
     </html>
   );

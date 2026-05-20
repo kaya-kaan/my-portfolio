@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { IconType } from "react-icons";
 import {
   FaArrowRight,
+  FaDatabase,
   FaEnvelope,
   FaGithub,
   FaJava,
@@ -14,11 +15,17 @@ import {
 } from "react-icons/fa";
 import {
   SiAndroid,
+  SiCucumber,
   SiDocker,
+  SiGithubactions,
   SiGithub,
   SiMysql,
   SiNextdotjs,
   SiReact,
+  SiPostgresql,
+  SiPostman,
+  SiPython,
+  SiSelenium,
   SiTailwindcss,
   SiTelegram,
   SiTypescript,
@@ -84,6 +91,41 @@ const stackItems = {
     label: "TypeScript",
     icon: SiTypescript,
     accentClassName: "bg-blue-100 text-blue-700",
+  },
+  python: {
+    label: "Python",
+    icon: SiPython,
+    accentClassName: "bg-blue-100 text-blue-700",
+  },
+  sql: {
+    label: "SQL Validation",
+    icon: FaDatabase,
+    accentClassName: "bg-sky-100 text-sky-700",
+  },
+  postgresql: {
+    label: "PostgreSQL",
+    icon: SiPostgresql,
+    accentClassName: "bg-sky-100 text-sky-700",
+  },
+  selenium: {
+    label: "Selenium",
+    icon: SiSelenium,
+    accentClassName: "bg-emerald-100 text-emerald-700",
+  },
+  cucumber: {
+    label: "Cucumber BDD",
+    icon: SiCucumber,
+    accentClassName: "bg-emerald-100 text-emerald-700",
+  },
+  postman: {
+    label: "Postman / RestAssured",
+    icon: SiPostman,
+    accentClassName: "bg-orange-100 text-orange-700",
+  },
+  githubActions: {
+    label: "GitHub Actions",
+    icon: SiGithubactions,
+    accentClassName: "bg-slate-100 text-slate-700",
   },
   github: {
     label: "GitHub",
@@ -160,83 +202,83 @@ const projects: Project[] = [
 ];
 
 const focusAreas = [
-  "Backend services that stay easy to reason about",
-  "Data-heavy features with clear querying and reporting",
-  "Automation that removes repetitive manual work",
-  "Web products that stay fast across devices",
+  "Test automation for UI, API, regression, and integration coverage",
+  "Backend validation and data workflows in Python, Java, and TypeScript",
+  "Data extraction pipelines that reduce manual content work",
+  "Full-stack tools with CI/CD-minded delivery",
 ];
 
 const techHighlights: TechHighlight[] = [
   {
     ...stackItems.java,
-    category: "Backend",
+    category: "Language",
     description:
-      "Primary language for object-oriented application logic, business rules, and systems work.",
+      "Object-oriented backend and automation work, including JUnit, TestNG, Maven, and Gradle-based workflows.",
+  },
+  {
+    ...stackItems.python,
+    category: "Data Pipelines",
+    description:
+      "HTML extraction, parsing, transformation, validation, and CSV/XLSX generation for structured content operations.",
   },
   {
     ...stackItems.typescript,
-    category: "Web",
+    category: "Full Stack",
     description:
-      "Type-safe development for React and Next.js interfaces that are easier to maintain over time.",
+      "Type-safe web applications, custom tooling, API integrations, and maintainable production code.",
   },
   {
-    ...stackItems.nextjs,
-    category: "Framework",
+    ...stackItems.sql,
+    category: "Database Testing",
     description:
-      "Used for routing, SEO, server rendering, and polished production-ready frontend workflows.",
+      "SQL queries, backend database testing, data validation, and relational checks across MySQL and PostgreSQL.",
   },
   {
-    ...stackItems.react,
-    category: "Frontend",
+    ...stackItems.selenium,
+    category: "UI Automation",
     description:
-      "Reusable component architecture for responsive, accessible interfaces and smooth iteration.",
+      "Cross-browser UI testing, Page Object Model structure, and regression coverage for complex user workflows.",
   },
   {
-    ...stackItems.tailwind,
-    category: "Styling",
+    ...stackItems.cucumber,
+    category: "BDD",
     description:
-      "Fast UI implementation with utility-first styling and consistent design across sections.",
+      "Readable scenario coverage, acceptance criteria alignment, and behavior-driven test suites.",
   },
   {
-    ...stackItems.mysql,
-    category: "Data",
+    ...stackItems.postman,
+    category: "API Testing",
     description:
-      "Relational modeling and query design for data-driven applications and reporting-heavy flows.",
+      "REST API testing, JSON/XML validation, contract testing basics, and integration-level checks.",
   },
   {
-    ...stackItems.android,
-    category: "Mobile",
+    ...stackItems.githubActions,
+    category: "CI/CD",
     description:
-      "Experience building native Android coursework projects with device testing and UI refinement.",
-  },
-  {
-    ...stackItems.github,
-    category: "Tooling",
-    description:
-      "Source control, portfolio publishing, and code sharing that makes projects easy to review.",
+      "Automated test feedback and delivery workflows using GitHub Actions, Jenkins, Docker, and Docker Compose.",
   },
 ];
 
 const aboutHighlights = [
   {
-    label: "I enjoy solving",
+    label: "I work across",
     value:
-      "messy data problems, repetitive workflows, and backend tasks that need to become simpler and more reliable.",
+      "Python, Java, TypeScript, SQL, REST APIs, Selenium, Cucumber, Postman, Docker, and GitHub Actions.",
   },
   {
-    label: "I am excited about",
+    label: "I care about",
     value:
-      "Java, TypeScript, SQL, automation, and the product thinking required to turn technical work into useful outcomes.",
+      "dependable test coverage, clean data validation, maintainable backend workflows, and fast CI/CD feedback loops.",
   },
   {
     label: "I am looking for",
     value:
-      "software engineering roles where I can contribute across backend or full-stack work, ship real features, and keep sharpening my fundamentals.",
+      "backend, SDET, QA automation, or full-stack roles where I can build reliable systems and improve product quality.",
   },
 ];
 
 const resumePath = "/Kaan_Kaya_Resume.pdf";
-const resumePreviewPath = "/resume-preview.png";
+const resumePreviewPath = "/resume-preview-updated.png";
 
 export default function HomePage() {
   const [name, setName] = useState("");
@@ -299,17 +341,17 @@ export default function HomePage() {
         >
           <div className="space-y-6">
             <p className="theme-pill-accent inline-flex rounded-full border px-4 py-1 text-sm font-semibold uppercase tracking-[0.18em]">
-              Software Engineer
+              Software Developer & SDET
             </p>
             <div className="space-y-4">
               <h1 className="theme-text-strong max-w-3xl text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
                 Kaan Kaya
               </h1>
               <p className="theme-text-secondary max-w-3xl text-xl leading-8 sm:text-2xl">
-                I build backend-heavy products, data workflows, and web
-                interfaces that stay practical under real constraints. My focus
-                is clear architecture, maintainable code, and software that
-                turns messy requirements into dependable systems.
+                I build backend-focused tools, test automation frameworks, and
+                data workflows that make complex systems easier to validate and
+                maintain. My work spans Python pipelines, UI and API testing,
+                SQL validation, CI/CD, and full-stack web applications.
               </p>
             </div>
 
@@ -452,11 +494,12 @@ export default function HomePage() {
               Tech Stack
             </p>
             <h2 className="theme-text-strong mt-3 text-3xl font-black tracking-tight sm:text-4xl">
-              Technologies I reach for most often
+              Backend, testing, and automation tools I use most often
             </h2>
             <p className="theme-text-secondary mt-4 text-lg leading-8">
-              Recognizable tooling makes the page easier to scan, so the stack
-              is called out explicitly instead of being buried in plain text.
+              This stack reflects the practical work in my resume: backend
+              validation, UI and API test automation, structured data pipelines,
+              and CI/CD-supported delivery.
             </p>
           </div>
 
@@ -498,22 +541,23 @@ export default function HomePage() {
               About
             </p>
             <h2 className="theme-text-strong text-3xl font-black tracking-tight sm:text-4xl">
-              I like turning complex workflows and raw data into tools people
-              can actually use
+              I build backend, automation, and testing workflows that turn
+              messy systems into reliable tools
             </h2>
             <p className="theme-text-secondary text-lg leading-8">
-              I am a software engineer with a strong interest in backend
-              systems, automation, and data-driven products. I enjoy building
-              the parts of a product that make everything else easier: reliable
-              APIs, clean data models, and interfaces that help people move
-              faster.
+              I am a backend-focused Software Developer and SDET in Toronto with
+              hands-on experience across production data pipelines, test
+              automation frameworks, and full-stack web applications. My recent
+              work blends Python automation, structured content operations, SQL
+              validation, REST API testing, and UI test coverage.
             </p>
             <p className="theme-text-secondary text-lg leading-8">
-              The work I gravitate toward usually starts with ambiguity. There
-              is a process that feels too manual, a dataset that is difficult to
-              explore, or a product flow that needs to become clearer and more
-              dependable. That is the kind of problem space I want to keep
-              working in.
+              At FRPO, I build Python pipelines that extract, clean, and
+              transform property data for CMS ingestion, reducing manual data
+              entry by 65-80% across more than 1,000 listings. At TripArc, I
+              designed and maintained UI and API automation for a travel booking
+              platform across booking, invoicing, reporting, supplier
+              integrations, and advisor workflows.
             </p>
 
             <div className="theme-accent-panel space-y-3 rounded-[1.5rem] border p-5">
